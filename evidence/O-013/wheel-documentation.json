@@ -1,0 +1,22 @@
+{
+  "wheel_proof": {
+    "wheel": "axiom_mcp-0.1.5-py3-none-any.whl",
+    "sha256": "0ac9b7dc897baf1087c1cdb0a5cb06dbc73cc86046d17ad9166463649c7c085f",
+    "source_revision": "1e7145ac93e2a09d23672e3e9ac9a6ab1b8f10a7",
+    "packaged_source_files": 55,
+    "runtime_inputs_required": true
+  },
+  "document_files": [
+    {
+      "path": "axiom_mcp/README.md",
+      "sha256": "5fe277c32e2b6fd66d82a1253a7b1bf670b7bad37759b59159677a1ec16087e4"
+    },
+    {
+      "path": "axiom_mcp-0.1.5.dist-info/METADATA",
+      "sha256": "de04ec5c6d60020ca02d3077c93f3bc5df0949ffa879d295092e27b177ca4814"
+    }
+  ],
+  "source_and_wheel_parity": true,
+  "private_ids_found": [],
+  "publication": "not performed; local artifact only"
+}
