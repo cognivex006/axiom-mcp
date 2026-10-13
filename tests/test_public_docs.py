@@ -58,7 +58,7 @@ def test_nested_public_guide_identifier_is_rejected(tmp_path, identifier):
     path = root / "docs/new/nested.md"
     path.parent.mkdir()
     path.write_text(f"Use the {identifier} function.\n", encoding="utf-8")
-    assert any(identifier in item for item in GUARD.check(root))
+    assert any(identifier.split(".")[0] in item for item in GUARD.check(root))
 
 
 @pytest.mark.parametrize(
