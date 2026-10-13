@@ -4,6 +4,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+Changes after the latest release are recorded here.
+
+## 0.1.6
+
 ### Documentation
 
 - Remove internal development identifiers from public guides, tool tables, release descriptions and packaged documentation. Describe tools and query operations by their names.
@@ -12,7 +16,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ### Chores
 
+- Align the portable package version with the improved ecosystem release. Tool names, schemas, dependencies and permissions are unchanged.
 - Check public documentation, generated release notes and packaged wheel README/METADATA for internal identifiers before delivery.
+
+Full Changelog: [v0.1.5…v0.1.6](https://github.com/orchex006/axiom-mcp/compare/v0.1.5...v0.1.6)
 
 ## 0.1.5
 
