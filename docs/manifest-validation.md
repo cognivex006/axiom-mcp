@@ -1,6 +1,6 @@
 # Manifest validation - canonical bytes, digests and shard closure
 
-Owner: `axiom-mcp`. Task: C-013. Implementation: `src/axiom_mcp/manifest.py`.
+Owner: `axiom-mcp`. Implementation: `src/axiom_mcp/manifest.py`.
 
 This module turns three integrity claims about a published generation into checks the
 reader actually performs, instead of assumptions it hopes hold:

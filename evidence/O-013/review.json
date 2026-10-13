@@ -1,0 +1,19 @@
+{
+  "task_id": "O-013",
+  "base_revision": "a2eed8875cfd520c15c237a5bba0b70784cb4795",
+  "source_revision": "1e7145ac93e2a09d23672e3e9ac9a6ab1b8f10a7",
+  "scope": "Public MCP docs, three README copies, versioned Changelog, release-note rendering and publication guards",
+  "checks": {
+    "pytest_passed": 810,
+    "skipped": 2,
+    "subtests_passed": 274,
+    "ruff": "passed",
+    "format": "174 files already formatted",
+    "links_checked": 84,
+    "wheel_docs": "README and METADATA clean with exact source parity"
+  },
+  "negative_cases": "Nested task/spec identifiers, missing docs, mismatched README copies, duplicate Unreleased, unordered versions, contaminated wheel METADATA, missing wheel doc, contaminated release notes and CI/help labels, missing/unknown release version",
+  "compatibility": "No tool name, arguments, response/schema, guard/security semantics, dependency or runtime behavior changed. Corrected current tool-registration wording matches runtime.compose. Preserved immutable canonical assets and fixtures. Historical originals retained internally.",
+  "limitations": "No native foreign Rust holder test or Windows backend executed locally (two skips). Existing SDK/Pydantic warning recorded. No licensed-host claim, release/tag, remote release-body update or existing installed-wheel replacement.",
+  "rollback": "Revert editorial/guard/renderer source commits; published tags/assets and user configuration are unchanged."
+}

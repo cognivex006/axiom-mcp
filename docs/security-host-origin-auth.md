@@ -95,7 +95,7 @@ a token, a stack trace or an unregistered absolute path.
 observed rather than what it intends: an authenticated handshake succeeded while
 a disallowed `Host`, a disallowed `Origin`, a missing token, a control-audience
 token, a read token requesting reconciliation and a read token naming another
-solution were each refused. See `evidence/artifacts/C-005/security-spike.txt`.
+solution were each refused. See the retained internal verification record.
 
 ## Unverified / limits
 

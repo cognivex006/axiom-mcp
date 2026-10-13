@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import shutil
+import tomllib
 from pathlib import Path
 
 LANES = {"windows-x64", "linux-x64", "macos-x64"}
@@ -12,6 +13,29 @@ LANES = {"windows-x64", "linux-x64", "macos-x64"}
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render_release_notes(version: str, repository: Path | None = None) -> str:
+    repository = repository or Path(__file__).resolve().parents[1]
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError("exact release version required")
+    text = (repository / "Changelog.md").read_text(encoding="utf-8")
+    entries = re.findall(r"^## (\d+\.\d+\.\d+)\s*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    matches = [body.strip() for name, body in entries if name == version]
+    if len(matches) != 1:
+        raise ValueError("exactly one matching Changelog release required")
+    changes = re.sub(r"^### ", "## ", matches[0], flags=re.M)
+    return (
+        f"# Axiom MCP {version}\n\n{changes}\n\n## Installation\n\n"
+        "Download the portable wheel and verify its SHA-256 against `SHA256SUMS`, then install "
+        "it in a Python 3.13 virtual environment:\n\n"
+        f"```sh\npython -m pip install axiom_mcp-{version}-py3-none-any.whl\n```\n\n"
+        "Configure stdio or Streamable HTTP with registered credential references. "
+        "Tool discovery alone does not establish authenticated graph access.\n\n"
+        "See the [installation guide](https://github.com/orchex006/axiom-mcp/blob/main/docs/"
+        "install-and-upgrade.md) and [tool reference](https://github.com/orchex006/axiom-mcp/"
+        "blob/main/docs/reference/mcp.md).\n"
+    )
 
 
 def collect(root: Path, source: str, output: Path):
@@ -67,6 +91,11 @@ def collect(root: Path, source: str, output: Path):
         inputs[lane] = files
     if proof.get("runtime_inputs_required") and set(inputs) != LANES:
         raise ValueError("native dependency inputs required for distribution")
+    repository = Path(__file__).resolve().parents[1]
+    version = tomllib.loads((repository / "pyproject.toml").read_text(encoding="utf-8"))["project"][
+        "version"
+    ]
+    release_notes = render_release_notes(version, repository)
     output.mkdir(parents=True)
     shutil.copyfile(wheel, output / name)
     shutil.copyfile(proofs[0], output / "wheel-provenance.json")
@@ -79,10 +108,7 @@ def collect(root: Path, source: str, output: Path):
             shutil.copyfile(file, output / file.name)
     (output / "SOURCE-REVISION.txt").write_text(source + "\n", encoding="utf-8", newline="\n")
     (output / "RELEASE-NOTES.md").write_text(
-        "# Axiom MCP\n\nOne portable Python 3.13 wheel; native Windows x64, Linux x64 and Mac "
-        "Intel installed-wheel checks passed. Mac ARM deferred. No certification/signing gate. "
-        "Install with pip so native dependencies resolve for the current OS. Stdio is host-owned; "
-        "HTTP is foreground and supervised by the CLI. No licensed AI host claim.\n",
+        release_notes,
         encoding="utf-8",
         newline="\n",
     )

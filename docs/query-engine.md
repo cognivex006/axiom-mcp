@@ -11,19 +11,19 @@ released, and every operation is bounded before it expands anything.
 
 ## Shape of the package
 
-| Module | Operation | Task |
-| --- | --- | --- |
-| `query/model.py` | pinned node/edge model, graph index, canonical limits | shared by all |
-| `query/search.py` | `search` - indexed symbol lookup | C-018 |
-| `query/context.py` | `context` - projected neighbourhood | C-019 |
-| `query/neighbors.py` | `neighbors`, `dependencies` - edge-kind traversal | C-020 |
-| `query/callers.py` | `callers` - cross-project reverse lookup | C-021 |
-| `query/impact.py` | `impact` - conservative reverse closure | C-022 |
-| `query/path.py` | `path` - shortest bounded path | C-023 |
-| `query/changes.py` | `changes` - generation comparison | C-024 |
-| `query/budget.py` | response byte-budget packer | C-025 |
-| `query/cursor.py` | cursor bound to snapshot, query and scope | C-026 |
-| `query/envelope.py` | response envelope, freshness, coverage, verification | C-027 |
+| Module | Operation |
+| --- | --- |
+| `query/model.py` | pinned node/edge model, graph index, canonical limits |
+| `query/search.py` | `search` - indexed symbol lookup |
+| `query/context.py` | `context` - projected neighbourhood |
+| `query/neighbors.py` | `neighbors`, `dependencies` - edge-kind traversal |
+| `query/callers.py` | `callers` - cross-project reverse lookup |
+| `query/impact.py` | `impact` - conservative reverse closure |
+| `query/path.py` | `path` - shortest bounded path |
+| `query/changes.py` | `changes` - generation comparison |
+| `query/budget.py` | response byte-budget packer |
+| `query/cursor.py` | cursor bound to snapshot, query and scope |
+| `query/envelope.py` | response envelope, freshness, coverage, verification |
 
 ## Limits
 
@@ -32,7 +32,7 @@ defaults to 100 (cap 1000); `max_bytes` defaults to 8192 (range 512..32768). A b
 ranges is a validation error, not a clamp: running a caller's query under a bound the caller did
 not choose would misreport what was actually searched.
 
-## Search (C-018)
+## Search
 
 `search_symbols` answers a free-text query over one pinned scope. Exact id, exact qualified name
 and exact name (and their case-folded forms) are index lookups; a prefix or substring query pays
@@ -44,7 +44,7 @@ An ambiguous *name* is not resolved by the server: every candidate at the best r
 `ambiguous` is true and a warning says so. `limit` caps the answer and sets `truncated` with a
 warning when it does.
 
-## Context (C-019)
+## Context
 
 `context` projects the neighbourhood of one target. `depth` is the hop count and is honoured
 literally: 0 is the target alone, and `n` never walks further. `projection` is the contract's
@@ -57,7 +57,7 @@ budgets stop expansion. When a budget stops it, `truncated` is true, `reasons` n
 `frontier` names the nodes at which expansion stopped, so a partial neighbourhood cannot be read as
 a complete one. An ambiguous target returns its candidates with `status="ambiguous_target"` and no
 invented neighbourhood.
-## Neighbours and dependencies (C-020)
+## Neighbours and dependencies
 
 `neighbors` walks a target's incident edges; `dependencies` is the outgoing dependency-kind case of
 the same traversal, not a second implementation. `direction` is `outgoing` (edges whose source is
@@ -75,7 +75,7 @@ An edge with `resolution="unresolved"` (no resolved target in this generation) i
 `unresolved` and is never followed: a list that silently omitted it would look complete when the
 generation cannot claim it is. `per_kind` counts the returned edges by kind, and an ambiguous
 target returns its candidates with `status="ambiguous_target"` and no invented neighbourhood.
-## Callers (C-021)
+## Callers
 
 `callers` returns the pinned nodes that reach a target. It is defined against the whole pinned
 scope, not the target's own project: `GraphSet` indexes each member's incoming edges under their
@@ -92,7 +92,7 @@ An empty caller list with `complete` false reads "none found in what was searche
 callers exist". An unresolved edge names the target by text and so cannot be filed in the reverse
 index; it is reported in `unresolved` and never followed or counted. `edge_kinds` defaults to every
 pinned kind except `CONTAINS`, because a container is not a caller.
-## Impact (C-022)
+## Impact
 
 `impact` returns the bounded reverse closure of a target - what has to be re-examined if the target
 changes. It is conservative, and it says so. `nodes` is the closure; `proven` is the subset
@@ -108,7 +108,7 @@ searched project's pinned coverage is `complete`. Otherwise `exhaustive` is fals
 `incomplete_reasons` names what cut the view (`depth_limited`, `truncated`, `missing_members`,
 `unresolved_edges`, `coverage_not_complete`). The result is static potential impact: not proof of
 runtime damage, and not proof that no other node is impacted.
-## Path (C-023)
+## Path
 
 `path` returns the shortest bounded path from `target` to `target_to` (required). `direction`
 defaults to `both`, so a path may follow an edge in either orientation; pass `outgoing` for a
@@ -122,7 +122,7 @@ when the search finished without being cut - the frontier emptied, the depth bou
 with a live frontier, no requested member is unpinned, and no unresolved reference names a node the
 search visited. Otherwise `incomplete_reasons` names why (`budget_exhausted`, `depth_limited`,
 `missing_members`, `unresolved_edges`) and the answer is "not found, and not disproved".
-## Changes (C-024)
+## Changes
 
 `changes(head, baseline)` compares two pinned generations fact by fact. Each project reports
 `added`, `removed` and `modified` nodes and edges; nodes and edges are matched by pinned id, so a
@@ -143,7 +143,7 @@ generations looks like a fact and is not one:
 
 Every refusal sets `comparable` false, returns no diff, and carries a warning naming the reason.
 
-## Byte budget (C-025)
+## Byte budget
 
 `pack_response(document, max_bytes=...)` packs a response inside a hard byte cap. The measurement is
 the encoded compact JSON in UTF-8 of the *whole* document, metadata included: the cap cannot be
@@ -161,7 +161,7 @@ When the document does not fit, whole items are trimmed from the tail of `nodes`
 
 An unmeasurable (non JSON-serialisable) document raises `BudgetInvalid`.
 
-## Cursor binding (C-026)
+## Cursor binding
 
 A cursor is not a portable page number. `CursorStore.issue` binds an opaque token to the catalog
 generation, the operation and its parameters, the scope, the capability and an expiry, and
@@ -182,7 +182,7 @@ includes a sequence, so the same request twice yields two distinct cursors. The 
 key-order independent, `ttl_seconds` ranges 1..3600 (default 300), and an out-of-range ttl or an
 unparseable generation is refused, never clamped.
 
-## Response envelope (C-027)
+## Response envelope
 
 `build_envelope(...)` assembles the contract's success envelope and nothing else: `schema_version`,
 `solution_id`, `catalog_generation_id`, `project_generations`, `freshness`, `coverage`,

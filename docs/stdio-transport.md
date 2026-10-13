@@ -1,6 +1,6 @@
 # stdio transport
 
-Public module launch now composes all six scoped tools (K-610). Stdio is an AI-host-owned child process; closing its pipe shuts it down. A bare install permits discovery but refuses tool calls without a registered credential. No OS-specific wrapper or background service is required. Historical transport-only records below remain unchanged.
+Public module launch now composes all six scoped tools. Stdio is an AI-host-owned child process; closing its pipe shuts it down. A bare install permits discovery but refuses tool calls without a registered credential. No OS-specific wrapper or background service is required. Historical transport-only records below remain unchanged.
 
 Owner: `axiom-mcp`. Contract: `repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` sections 1, 2 and 10, at the pinned
 `axiom-specs` revision. This document records implementation, not policy.
@@ -77,8 +77,8 @@ This module owns **which stream carries protocol and which carries diagnostics**
 
 - the tool catalog or the query data plane - those belong to the query gateway;
 - the protocol revision the server negotiates - the SDK does, and the negotiated value is read back, never hardcoded;
-- HTTP host, origin or token policy - those belong to `axiom_mcp.security` (C-005);
-- the public `axiom-mcp` user-facing command - that belongs to `axiom_mcp.cli` (C-007). `python -m axiom_mcp.stdio`
+- HTTP host, origin or token policy - those belong to `axiom_mcp.security`;
+- the public `axiom-mcp` user-facing command - that belongs to `axiom_mcp.cli`. `python -m axiom_mcp.stdio`
   exists so the transport can be run and verified on its own.
 
 ## Verification

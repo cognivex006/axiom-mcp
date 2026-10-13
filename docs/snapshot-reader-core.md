@@ -15,10 +15,10 @@ and the reader's own gateway behavior is `repo-seeds/axiom-mcp/docs/17-FASTAPI-M
 sections 3, 5, 7 and 9. Where this page and a specification disagree, the specification wins
 and the disagreement is a defect in this repository.
 
-## C-011 — Windows shared guard (`src/axiom_mcp/guard/locks_windows.py`)
+## Windows shared guard (`src/axiom_mcp/guard/locks_windows.py`)
 
 `src/axiom_mcp/guard/` is one package with one engine and one platform primitive per supported
-platform. C-010 landed the package with `engine.py`, `protocol.py` and the POSIX `flock`
+platform. native guard package landed the package with `engine.py`, `protocol.py` and the POSIX `flock`
 backend; this slice adds the Windows backend as its sibling. The card's proposed path
 `src/axiom_mcp/locks_windows.py` would have split the guard across two layouts, so the module
 lives inside the package instead.
@@ -68,7 +68,7 @@ the Windows half of the slice is never inferred from a POSIX run. Two-process ex
 observed by launching `python -m axiom_mcp.guard.interop` as a child rather than by comparing
 two objects in one interpreter, because a lock that only excludes itself proves nothing.
 
-## C-012 — Pinned catalog vector (`src/axiom_mcp/catalog.py`)
+## Pinned catalog vector (`src/axiom_mcp/catalog.py`)
 
 The catalog is the read-model commit point, so a query resolves it once and then reads every
 member from the exact generation that vector names. `load_solution_catalog(location)` reads the
@@ -109,7 +109,7 @@ renamed generation directory and an absent catalog pointer.
 `axiom-specs/examples/snapshots/.axiom/graph/demo-solution`; the test asserts each vendored
 manifest still hashes to the generation directory that holds it.
 
-## C-014 — Bounded shard load (`src/axiom_mcp/shards.py`)
+## Bounded shard load (`src/axiom_mcp/shards.py`)
 
 `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 5 step 5 fixes the traversal rule - traverse
 from the manifest indexes only, never glob JSON, keep every file under the bound graph root
@@ -136,7 +136,7 @@ turn into disk traffic first.
 
 Consequences worth knowing when reading the code:
 
-* **`copy_shards` is separate from `verify_copied` on purpose.** C-015 needs the copy to happen
+* **`copy_shards` is separate from `verify_copied` on purpose.** read sessions needs the copy to happen
   under the shared guard and the parse to happen after the guard is released, so the copy and
   the verification are two functions rather than one call.
 * **`read_bounded` is the only read path.** It returns at most `limit + 1` bytes, so a caller
@@ -152,7 +152,7 @@ shard whose file is a directory, an oversized shard whose bytes are not valid JS
 is over budget passing a reader that fails if it is ever called, a forged manifest entry, and
 substituted bytes of the same size.
 
-## C-015 ? Read session: copy under guard, respond after release (`src/axiom_mcp/read_session.py`)
+## Read session: copy under guard, respond after release (`src/axiom_mcp/read_session.py`)
 
 `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 3.1 fixes the shape of a read: take the shared
 guard, copy the pointer, the manifest and only the shards the query needs into memory, then
@@ -187,7 +187,7 @@ response attempted while a lock is held, refuse oversized pointer/manifest/plan 
 anything is read, and surface a shard removed mid-copy as an error with the guard released
 rather than as a partial answer.
 
-## C-016 ? Cache keyed by immutable generation identity (`src/axiom_mcp/cache.py`)
+## Cache keyed by immutable generation identity (`src/axiom_mcp/cache.py`)
 
 A cache in front of a pinned read must not undo the pin. SNP-03 says one query reads one exact
 generation and never follows `current.json` again; a cache keyed by lane, project name or
@@ -222,7 +222,7 @@ generation reloads instead of hitting the old entry), and the negative/boundary 
 (mis-digest `put` refused, tampered entry dropped on `get`, both LRU limits enforced in LRU
 order, an over-budget payload refused without eviction, and invalid limits/keys refused).
 
-## C-017 ? Missing, corrupt and archived snapshots (`src/axiom_mcp/recovery.py`)
+## Missing, corrupt and archived snapshots (`src/axiom_mcp/recovery.py`)
 
 `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 5 ends with the rule this module implements:
 if a required generation is missing or corrupt, drop the partial request, retry bounded against

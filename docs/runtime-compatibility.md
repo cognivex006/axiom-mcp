@@ -13,16 +13,14 @@ this component implements the pin.
 | FastAPI / Uvicorn / Starlette | `0.139.2` / `0.51.0` / `1.3.1` | `pyproject.toml` |
 | Pydantic / anyio / httpx | `2.13.4` / `4.14.2` / `0.28.1` | `pyproject.toml` |
 | Minimum protocol revision | `2025-11-25` | `axiom_mcp.version.MCP_PROTOCOL_MINIMUM` |
-| Spec pin | `2.0.0-draft.1` at `80f44e836ced442e8f3ea33d167bd369ed6796bc` | `spec.lock.json` |
 
 Graph payload schema `1`, control API `1` and queue schema `1` are independent
 integer-major dimensions copied from `contracts/version-dimensions.json`; they are
 reported, never invented here.
 
-## Compatibility spike (C-001)
+## SDK compatibility checks
 
-The SDK surface used by later transports is recorded in the spike artifact
-`evidence/artifacts/C-001/sdk-compat-spike.txt` and enforced by
+The SDK surface used by the transports is enforced by
 `tests/test_runtime_pin.py`. The spike resolved, on the installed SDK:
 
 - `mcp.server.fastmcp.FastMCP.streamable_http_app`, `FastMCP.run_stdio_async`,
@@ -59,5 +57,5 @@ python -m pytest tests -q
 ```
 
 `axiom_mcp.version.runtime_pin_reasons()` is the shared predicate that `axiom-mcp
-doctor` reports (C-007). Re-pinning requires a new spike, new artifacts and an
+doctor` reports. Re-pinning requires a new spike, new artifacts and an
 updated `spec.lock.json` review; it is never inferred from a build timestamp.

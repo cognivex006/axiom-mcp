@@ -17,7 +17,7 @@ records how the three reader failure states stay distinguishable across surfaces
 
 `build_gateway` composes these into one FastAPI application. It registers `/mcp` through
 `axiom_mcp.sdk_compat.mount_streamable_http`, so the endpoint path, the lifespan composition and the handler identity are
-the ones C-002 verified; this module adds only the two probes. Nothing is registered at `/`, so a root mount cannot
+the ones SDK lifespan composition verified; this module adds only the two probes. Nothing is registered at `/`, so a root mount cannot
 shadow a later route.
 
 ## Why streaming is observed, not assumed
@@ -60,7 +60,7 @@ reporting non-completion, and the harness must not disguise its own limitation a
 
 `HttpTransportSettings` defaults to `127.0.0.1:8765`. A non-loopback bind requires an explicit
 `allow_non_loopback_bind=True` acknowledgement and is otherwise refused with `non_loopback_bind_refused`: without an
-authenticated surface (C-005), a remote bind would expose an unauthenticated gateway. `uvicorn_config` disables the
+authenticated surface, a remote bind would expose an unauthenticated gateway. `uvicorn_config` disables the
 access log and lowers the log level, because on this component the diagnostic channel must not be the protocol channel.
 
 `python -m axiom_mcp.http` requires `--allow-host` and `--allow-origin` explicitly; there is no permissive default. The
@@ -71,8 +71,8 @@ allowlists are passed to the SDK unchanged and never widened here.
 This module owns **transport assembly and wire observation**. It does not own:
 
 - the tool catalog or query answers - the query gateway;
-- Host/Origin allowlist policy and token scope - `axiom_mcp.security` (C-005);
-- readiness inputs - C-007 and the query/control planes supply the probes; the default here reports both planes
+- Host/Origin allowlist policy and token scope - `axiom_mcp.security`;
+- readiness inputs - CLI diagnostics and the query/control planes supply the probes; the default here reports both planes
   unavailable rather than claiming readiness the gateway has not earned;
 - the protocol revision - the SDK negotiates it and the spike reads it back (`2025-11-25` on the pin).
 

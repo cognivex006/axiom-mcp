@@ -1,6 +1,6 @@
 # Development — axiom-mcp
 
-## Portable MCP delivery — K-610 / ADR-0031
+## Portable MCP delivery
 
 Ship one `py3-none-any` wheel and the same commands across native OS targets. CLI owns platform installation/service supervision; MCP uses internal native guard adapters. Stdio is a host-owned child; HTTP runs in foreground. Current READY requires installed-wheel Windows/Linux/Mac Intel GitHub Actions checks and immutable wheel/source hashes. Mac ARM, certification, signing and attestation are not gates. Earlier local candidate/certification statements below are historical scope records. Publication remains separately authorized.
 
@@ -19,26 +19,8 @@ Take only tasks whose `repo` is `axiom-mcp`. Public commands, schema/layout vers
 
 Canonical workflow คือ `Development.md` ใน `axiom-specs` ณ revision ที่ `spec.lock.json` pin ไว้
 
-สถานะปัจจุบัน: `spec.lock.json` verify แล้ว (immutable revision และ contract digests ผ่าน `tools/spec-lock-check.py` ด้วย exit code 0) และ implementation ลงใน repository นี้แล้ว - `src/axiom_mcp/` 49 โมดูล และ `tests/` 44 โมดูล. Required checks `python -m pytest tests -q`, `python -m ruff check .` และ `python -m ruff format --check .` ถูกตั้งโดย `C-001` แล้ว ทุก task ถัดไป MUST รันทั้งสามกับ bytes สุดท้าย และ MUST บันทึก check ที่ยังไม่ได้รันเป็น unverified (ตัวอย่างที่บันทึกไว้จริง: POSIX guard backend, cross-language Rust-holder exclusion และ native host-process launch)
+Verify the immutable revision and every contract digest in `spec.lock.json` before editing. Run all required pytest and Ruff checks against final source bytes; record omitted native checks as unverified.
 
-K-107 local Mac Intel candidate ใช้ `tests/native/capture_installed_k107.py` กับ A/B archive
-ที่ระบุ SHA จริง และ `capture_native_matrix.py --installed-repo --installed-axiom-home`
-สำหรับ process legs จาก versioned wheel interpreter. Evidence นี้เป็น local candidate
-เท่านั้น; การรับรอง release และ lane อื่นต้องใช้ release-phase run แยกต่างหาก.
-
-K-407 local Linux x64 container candidate ใช้ `capture_native_matrix.py` กับ
-`--target container-linux-x64 --task-id K-407 --installed-symbol K406WatcherB`
-และ K-406 installed volume. Query และ stdio tool subprocess ใช้ wheel interpreter
-ใน versioned environment; native identity และผล process/security อยู่ใน
-`evidence/K-407/`. Released-fixture certification ยังคงเป็น release-phase gate.
-
-K-409 WSL2 installed MCP candidate uses `tests/native/capture_wsl_k409.py` on an
-existing non-root WSL2 x64 user with a fresh task-owned home and exact K-408
-A/B kit, runtime, wheelhouse and wheel inputs. Installed-wheel queries run after
-A, restart, B update and rollback; `capture_native_matrix.py` records actual WSL2
-process/security and `installed_guard_probe.py` records POSIX exclusion/recovery.
-Evidence stays in `evidence/K-409/`; container proof, publication and certification
-remain separate. Resolve current Git checkouts instead of historical host paths.
 
 ## Preflight — ก่อนเริ่มทุก task
 
@@ -62,15 +44,8 @@ remain separate. Resolve current Git checkouts instead of historical host paths.
 
 ## Required checks
 
-K-303 Windows x64 owner input uses Python 3.13 and a wheel built from this
-repository, plus a hash-pinned, offline Windows wheelhouse. Verify the owner
-wheel and every dependency byte with `release/verify_windows_inputs.py` before
-K-304 provisioning. This artifact proof does not establish installed query or
-release provenance.
-Use `release/build_windows_wheel.py` against an immutable source revision so
-tracked `build/lib` and egg-info from older builds cannot enter the owner wheel.
 
-C-001 established this repository's required checks (stack: Python 3.13 + official MCP SDK `mcp==1.28.1` + FastAPI):
+Required checks for this repository's required checks (stack: Python 3.13 + official MCP SDK `mcp==1.28.1` + FastAPI):
 
 ```text
 python -m pytest tests -q
@@ -151,3 +126,15 @@ Merge เข้า `release/vX.Y.Z`, การ tag และ publish MUST มี
 ## Cross-repository
 
 เมื่อ task นี้กระทบ `axiom-specs`, `axiom-graphd` หรือ `axiom-skills` ต้องแยก child task ต่อ repository และแต่ละ repository ใช้ branch/verification/commit/push lifecycle ของตัวเอง
+
+## Public documentation
+
+Use command names and user-visible behavior in guides and release notes. Internal task/spec/function tracking labels belong in internal evidence, not public documentation or the packaged README. Preserve real tool names, error codes, protocol versions and public issue/PR references.
+
+Changelog has one Unreleased section followed by descending release versions, with New Features, Bug Fixes and Known Limitations where applicable. The release collector renders the selected version's changes. Historical snapshots and an internal changelog receipt preserve development traceability.
+
+```sh
+python tools/check_public_docs.py
+```
+
+The same check runs before wheel packaging and release publication. It verifies source/packaged README parity and scans wheel documentation without modifying immutable protocol assets.

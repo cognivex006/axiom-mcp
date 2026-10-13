@@ -1,4 +1,4 @@
-"""How axiom-mcp places the official MCP SDK inside FastAPI.
+# SDK lifespan and HTTP routing
 
 Owner: `axiom-mcp`. Contract path: `/mcp` (Streamable HTTP). Verified against
 `mcp==1.28.1`, the SDK pin recorded in `pyproject.toml` and `axiom_mcp.version`.
@@ -16,7 +16,7 @@ Starlette runs the lifespan of the **top-level** application only. `Mount`
 composes routing, not startup or shutdown, so the SDK session manager is never
 entered. The route answers, and then the first protocol request fails with
 `Task group is not initialized`. The recorded evidence is
-`plain_mount_without_composed_lifespan.status = 500` in the C-002 artifact: a
+`plain_mount_without_composed_lifespan.status = 500` during the SDK compatibility check: a
 mount that looks correct and cannot answer `initialize`.
 
 ## What this repository does instead
@@ -87,10 +87,7 @@ still has to add health, readiness and tool routes.
 
 ## Limitations
 
-Verified on this host only (Python 3.13.14, win32, `mcp==1.28.1`). The
-in-process ASGI client opens no socket, so binding, TLS, `uvicorn` workers and
-real network client behaviour are not covered here; loopback binding and worker
-count belong to C-004 and C-005. The SDK's public surface used here
+In-process ASGI tests do not establish TLS deployment, remote client behavior or licensed AI-host integration. The SDK's public surface used here
 (`streamable_http_app`, `session_manager`, `Route.endpoint`,
 `streamable_http_client`) is pinned by `axiom_mcp.version.SDK_SURFACE` or
 covered by tests, so a future SDK that renames them fails a test rather than
