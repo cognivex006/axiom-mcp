@@ -2,7 +2,7 @@
 
 Owner: `axiom-mcp`. Consumes `SOURCE-OF-TRUST.md` section 5,
 `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 2 and
-`contracts/native-reader-writer-guards.md` section 1. Implements C-009.
+`contracts/native-reader-writer-guards.md` section 1.
 
 ## The rule
 

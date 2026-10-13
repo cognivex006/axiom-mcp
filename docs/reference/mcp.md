@@ -9,15 +9,7 @@ transport, the tool catalog and the `graph_query` contract;
 `contracts/redaction-policy.md` fixes what may cross the response boundary. This page is a
 reference for that contract, not a record of a running gateway.
 
-**Status: the tool layer is landing task by task.** The tree contains the transports, the
-error model, the native guard engine, the registry, the manifest validator, the bounded
-query engine and the CLI. `src/axiom_mcp/tools/` now exists: `catalog.py` holds the
-canonical six-tool catalog, `context.py` holds the closed-argument parser and the
-re-authorizing `ToolContext`, `status.py` implements `graph_status`, `query.py` implements the
-`graph_query` dispatcher, `reconcile.py` implements `graph_reconcile`, `job.py` implements
-`graph_job`, `verify.py` implements `graph_verify` and `version.py` implements
-`graph_version`. The rows below record which tools are real at this revision; every remaining shape is a **contract, not an
-observation**, until the registering task named in the catalog lands.
+The public stdio and Streamable HTTP entrypoints register all six tools listed below. Tool discovery is available without credentials; tool calls require a registered credential with the matching capability. Installation and updates are handled through the CLI, not through tool discovery.
 
 ## Transports
 
@@ -43,14 +35,14 @@ Tool names and the capability each requires are fixed by
 boundary, so the catalog owner answers `NOT_FOUND` rather than the boundary widening
 access.
 
-| Tool | Purpose | Capability | Side effect | Registered by | Status |
-| --- | --- | --- | --- | --- | --- |
-| `graph_status` | Solution/project freshness, coverage, generations, capabilities | `read` | none | C-028 | Implemented (`tools/status.py`) |
-| `graph_query` | Graph operation: `search`, `context`, `neighbors`, `callers`, `dependencies`, `impact`, `path`, `changes` | `read` | none | C-029 | Implemented (`tools/query.py`) |
-| `graph_reconcile` | Enqueue a graphd reconcile job for a scope | `reconcile` | Enqueue graphd job | C-030 | Implemented (`tools/reconcile.py`) |
-| `graph_job` | Job status or explicit cancel | `reconcile` | Status read; `cancel` is an explicit write | C-031 | Implemented (`tools/job.py`) |
-| `graph_verify` | Bounded verification request against an expected fingerprint or barrier | `checkpoint` | Bounded verification request | C-032 | Implemented (`tools/verify.py`) |
-| `graph_version` | Selected components and their compatibility | `read` | none | C-033 | Implemented (`tools/version.py`) |
+| Tool | Purpose | Capability | Side effect | Status |
+| --- | --- | --- | --- | --- |
+| `graph_status` | Solution/project freshness, coverage, generations, capabilities | `read` | none | Implemented (`tools/status.py`) |
+| `graph_query` | Graph operation: `search`, `context`, `neighbors`, `callers`, `dependencies`, `impact`, `path`, `changes` | `read` | none | Implemented (`tools/query.py`) |
+| `graph_reconcile` | Enqueue a graphd reconcile job for a scope | `reconcile` | Enqueue graphd job | Implemented (`tools/reconcile.py`) |
+| `graph_job` | Job status or explicit cancel | `reconcile` | Status read; `cancel` is an explicit write | Implemented (`tools/job.py`) |
+| `graph_verify` | Bounded verification request against an expected fingerprint or barrier | `checkpoint` | Bounded verification request | Implemented (`tools/verify.py`) |
+| `graph_version` | Selected components and their compatibility | `read` | none | Implemented (`tools/version.py`) |
 
 `graph_reconcile`, `graph_job` and `graph_verify` are the mutation paths. They reach beyond
 the read-only plane and the gateway re-authorizes the incoming capability instead of
@@ -590,47 +582,15 @@ version change and not a silent extension. If an old generation has been collect
 gateway returns `SNAPSHOT_EXPIRED`; it does not answer from a different generation under
 the old identity.
 
-## Unverified / not yet available
+## Readiness and limits
 
-- **Tool registration and the SDK mount.** `src/axiom_mcp/tools/` exists and
-  `graph_status` and `graph_query` are implemented, but the handlers are not yet wired into
-  the SDK's tool registration, so a client that lists tools still sees an empty catalog.
-  The six registering tasks (`C-028`..`C-033`) are done; what this revision still does not
-  carry is the SDK registration adapter itself.
-- **The `changes` diff detail.** `graph_query` carries head-side added and modified facts;
-  the removed facts and the engine's per-kind totals are not part of the envelope. The
-  bundled `demo-solution` declares no schema major, so `changes` legitimately answers
-  `unknown_schema` there and a comparable diff is only reachable for a generation that
-  declares one.
-- **Freshness, coverage and verification computation.** The fields are specified and the
-  component that computes them (C-027) is implemented: `src/axiom_mcp/tools/status.py`
-  projects freshness, coverage and verification and `query/envelope.py` resolves the
-  aggregate. What remains unverified is the daemon evidence a `fresh` claim needs, not the
-  computation.
-- **Cursors and byte-budget packing.** C-026 and C-025 are implemented: `graph_query`
-  re-checks a presented cursor through `query/cursor.py` and enforces the byte cap through
-  `query/budget.py`, so `truncated` and the budget behaviour are live. `next_cursor` is the
-  part still contract-only - the query path resolves a cursor but never issues one.
-- **A live graphd daemon.** The concrete control client exists (C-034,
-  `src/axiom_mcp/control_client.py`) and its audience handling, bounded retries and outage
-  behaviour are covered by tests over `httpx.MockTransport`, but no real daemon was reached from
-  this repository, so its wire shapes are verified against `contracts/control-api-v1.md` rather
-  than against a running graphd.
-- **Readiness inputs.** `/readyz` reports the query and control planes separately, and the
-  readiness decision now comes from `src/axiom_mcp/lifecycle.py` (C-035): the SDK must be
-  initialized and the query plane usable before a gateway reports ready, an optional query
-  probe may supply or withhold that availability, and a probe that raises is reported as
-  unavailable rather than treated as up. The transport-only default still reports both planes
-  unavailable rather than claiming readiness the gateway has not earned. Shutdown is bounded:
-  in-flight queries are given a deadline, and when it expires the remaining work is counted as
-  cancelled and the guard is released anyway, so a restart cannot inherit a stranded lock.
-  That guard-release leg is covered by a test that drives the real native guard. Control-plane
-  availability is recorded by the caller with `mark_control_available`; it is not yet derived
-  from a running daemon.
+All six handlers are registered through the gateway runtime on both public transports. Native installed-wheel checks cover protocol discovery, authenticated calls, scoped refusals and shutdown. These checks do not establish integration with a particular licensed AI-host application.
 
-Verified at this revision: the transports, the error model, the capability map and the
-`graph_status`, `graph_query`, `graph_reconcile`, `graph_job`, `graph_verify` and
-`graph_version` handlers are real
-and covered by tests, exercised against the shipped
-`demo-solution` bundle, the real registry and the real native guard. No tool call has been
-observed through a running gateway, because tool registration is not wired yet.
+- **Generation comparisons:** `changes` reports head-side added/modified facts. Removed facts and per-kind totals are not included. Incompatible or undeclared schema majors are reported instead of compared.
+- **Cursors and budgets:** queries validate incoming cursors and enforce byte budgets. The query path does not currently issue a new `next_cursor`.
+- **Freshness:** response/status code projects the recorded freshness, coverage and verification evidence. A fresh claim depends on valid daemon-produced inputs, not simply on an initialized SDK.
+- **Readiness:** `/readyz` separates query and control availability. A listening process alone is insufficient. Missing probes or unavailable inputs must be reported; transport-only defaults do not establish graph readiness.
+- **Control operations:** reconciliation, job cancellation and verification delegate to the graph daemon and keep the caller's capability boundary. Reads can use valid snapshots while control is offline; control-dependent calls report that failure.
+- **Shutdown:** in-flight work has a deadline and native read guards are released on cancellation, so streaming or a restart does not retain the guard.
+
+See [query transports](../query-transports.md), [snapshot guide](../guides/snapshots.md) and [CLI diagnostics](../cli-version-and-doctor.md) for operation-specific failure handling.

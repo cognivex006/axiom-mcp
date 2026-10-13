@@ -1,4 +1,4 @@
-# Portable wire paths and native bindings (V2-016)
+# Portable wire paths and native bindings
 
 `src/axiom_mcp/paths.py` is the one boundary where the two things this gateway calls "a path" are
 normalized. It implements `contracts/cross-platform-v2.md` CP-02 and CP-03: serialize paths only

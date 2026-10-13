@@ -1,6 +1,6 @@
 # axiom-mcp documentation
 
-These guides are owned and released with `axiom-mcp`. They describe the intended
+Start with [Installation and upgrade](install-and-upgrade.md), then choose [stdio](stdio-transport.md) or [HTTP](http-transport.md) for your host. These guides are owned and released with `axiom-mcp`. They describe the intended
 behavior of the gateway and record what has actually been executed; they are not
 a record of a running gateway or a certificate for any target. Resolve
 cross-component normative references through the pinned `axiom-specs` revision -
@@ -21,7 +21,7 @@ canonical contracts live there and must not be forked as an editable copy here.
 - [Snapshot reader core](snapshot-reader-core.md)
 - [How axiom-mcp turns a logical reference into a snapshot path](snapshot-registry.md)
 - [Snapshot race and read-only guide](guides/snapshots.md)
-- [Portable wire paths and native bindings (V2-016)](portable-paths.md)
+- [Portable wire paths and native bindings](portable-paths.md)
 
 ## Errors, contracts and compatibility
 
@@ -38,13 +38,6 @@ canonical contracts live there and must not be forked as an editable copy here.
 - [Update check and approved-plan delegation](update-plan-delegation.md)
 - [Release packaging into versioned environments](release-packaging.md)
 
-## Verification evidence
+## For contributors
 
-- [Native query and host process matrix (V2-031)](../tests/native/README.md) - what was executed on
-  each host, the real exit codes, and the targets that stay `not_run`.
-
-## Ownership
-
-Documentation for code is owned here and changes in the same branch as the code.
-Cross-component navigation is aggregated from pinned revisions; it does not
-require a separate documentation repository or a second version train.
+See [Development](../Development.md) for required checks and [native verification](../tests/native/README.md) for installed-wheel testing. Versioned user-facing changes are in [Changelog](../Changelog.md).

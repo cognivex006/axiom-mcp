@@ -1,15 +1,10 @@
-# axiom-mcp
+# Axiom MCP
 
-One portable Python 3.13 wheel and the same MCP commands on Windows, Linux and macOS. OS installation and service selection belong to the Axiom CLI. GitHub Actions verifies installed-wheel Windows x64, Linux x64 and Mac Intel execution; Mac ARM is deferred. GitHub Releases distributes the checked wheel and checksums without certification/signing prerequisites. Current evidence is recorded in `release/readiness.json` when all native checks pass.
+Query the Axiom code graph from your AI assistant through MCP. The gateway provides six authenticated tools over stdio or Streamable HTTP, using published graph snapshots for reads and delegating control operations to the graph daemon.
 
-Python query gateway for the Axiom Graph Ecosystem: a FastAPI + official MCP SDK service that
-answers graph operations over processed JSON without touching the graph runtime.
+One portable Python 3.13 wheel supports Windows x64, Linux x64 and Intel Mac. The Axiom CLI manages ecosystem installation and OS service supervision. Apple silicon runtime verification is deferred.
 
-This is the **package README**. It is written for a consumer who has the installed artifact, so it
-carries only what that consumer needs: how to install, how to verify, how to launch, and where the
-rest of the documentation and the normative contracts live. The full procedure — the versioned
-environment layout, the refusal table, upgrade and rollback — is in
-[Installation and upgrade](docs/install-and-upgrade.md).
+Start with [Installation and upgrade](docs/install-and-upgrade.md), [MCP tools](docs/reference/mcp.md) or [transport setup](#run). For the complete ecosystem, use the [Axiom CLI installation guide](https://github.com/orchex006/axiom-cli/blob/main/docs/INSTALL.md).
 
 ## Install
 
@@ -27,8 +22,7 @@ To build the artifact from a checkout:
 python -m build --wheel --no-isolation
 ```
 
-`axiom-mcp` is position 2 of the ecosystem install order: the `axiom-graphd` core release installs
-first, the gateway second, and the `axiom-skills` bundle third. No prerequisite of this component
+The gateway reads graph data produced by `axiom-graphd`; install the graph runtime before configuring MCP. Agent plugins are installed separately through the [skills guide](https://github.com/orchex006/axiom-skills/blob/main/marketplace-plugins/README.md). No prerequisite of this component
 requires elevation, WSL, Docker, Bash or Node.js.
 
 ## Verify
@@ -110,12 +104,11 @@ contracts stay canonical in `axiom-specs` and are resolved through the pinned re
 immutable pin and its contract digests are recorded in `spec.lock.json` — never as a local editable
 copy.
 
-## Not implemented in this revision
+## Command and ownership boundaries
 
 The CLI registers `version`, `doctor` and `update check|apply`; the other subcommands in the
-canonical CLI contract belong to later tasks, and an unregistered subcommand exits `2`. No daemon,
-publication or GC runtime exists here — the writer side is `axiom-graphd`. No ecosystem-level
-`uninstall` verb is defined by any owner document. `release/package.py` is operator tooling and is
+canonical CLI contract are not exposed by this package, and an unregistered subcommand exits `2`. No daemon,
+publication or GC runtime exists here — the writer side is `axiom-graphd`. This package does not expose ecosystem removal; use `axm uninstall` for a CLI-managed installation. `release/package.py` is operator tooling and is
 not part of the installed distribution. [Installation and upgrade](docs/install-and-upgrade.md)
 section 11 carries the complete list.
 
@@ -141,4 +134,4 @@ transports, and the `version`/`doctor`/`update` CLI with the locked launch entry
 skills (`axiom-skills`): public commands, schema and layout versions, the control API, guard
 semantics and migration decisions change in `axiom-specs` first.
 
-Current scope follows `axiom-specs` ADR-0031: Windows x64, Linux x64 and Mac Intel installed-wheel proof; Mac ARM is deferred and certification does not block delivery. One owner wheel is shared by all lanes; native dependency wheels are resolved by pip for the host. Older `not_run` and certification records remain historical evidence. Native MCP protocol tests do not claim licensed AI host applications were exercised.
+Native installed-wheel verification covers Windows x64, Linux x64 and Mac Intel installed-wheel proof; Mac ARM is deferred. One owner wheel is shared by all lanes; native dependency wheels are resolved by pip for the host.  Native MCP protocol tests do not claim licensed AI host applications were exercised.
