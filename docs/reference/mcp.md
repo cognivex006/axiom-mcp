@@ -1,15 +1,6 @@
 # MCP tools and response reference
 
-Owner: `axiom-mcp`. Normative sources live in `axiom-specs`:
-`repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` sections 2, 4, 5, 6, 7 and 9 define the
-transport, the tool catalog and the `graph_query` contract;
-`contracts/schemas/query-request.schema.json` and
-`contracts/schemas/query-response.schema.json` define the request and response shapes;
-`contracts/control-api-v1.md` fixes the canonical codes and their HTTP status;
-`contracts/redaction-policy.md` fixes what may cross the response boundary. This page is a
-reference for that contract, not a record of a running gateway.
-
-The public stdio and Streamable HTTP entrypoints register all six tools listed below. Tool discovery is available without credentials; tool calls require a registered credential with the matching capability. Installation and updates are handled through the CLI, not through tool discovery.
+The public stdio and Streamable HTTP entrypoints expose six tools. This reference describes their arguments, capabilities, response shapes and limits. Start with [installation and connection setup](../install-and-upgrade.md).
 
 ## Transports
 
@@ -29,20 +20,16 @@ apart.
 
 ## Tool catalog
 
-Tool names and the capability each requires are fixed by
-`repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` section 4 and transcribed in
-`src/axiom_mcp/security.py`. An unknown tool name is treated as a read at the transport
-boundary, so the catalog owner answers `NOT_FOUND` rather than the boundary widening
-access.
+Tool discovery exposes the names below. Each request is authenticated and authorized for its required capability and selected scope.
 
-| Tool | Purpose | Capability | Side effect | Status |
-| --- | --- | --- | --- | --- |
-| `graph_status` | Solution/project freshness, coverage, generations, capabilities | `read` | none | Implemented (`tools/status.py`) |
-| `graph_query` | Graph operation: `search`, `context`, `neighbors`, `callers`, `dependencies`, `impact`, `path`, `changes` | `read` | none | Implemented (`tools/query.py`) |
-| `graph_reconcile` | Enqueue a graphd reconcile job for a scope | `reconcile` | Enqueue graphd job | Implemented (`tools/reconcile.py`) |
-| `graph_job` | Job status or explicit cancel | `reconcile` | Status read; `cancel` is an explicit write | Implemented (`tools/job.py`) |
-| `graph_verify` | Bounded verification request against an expected fingerprint or barrier | `checkpoint` | Bounded verification request | Implemented (`tools/verify.py`) |
-| `graph_version` | Selected components and their compatibility | `read` | none | Implemented (`tools/version.py`) |
+| Tool | Purpose | Capability | Side effect |
+| --- | --- | --- | --- |
+| `graph_status` | Solution/project freshness, coverage, generations, capabilities | `read` | none |
+| `graph_query` | Graph operation: `search`, `context`, `neighbors`, `callers`, `dependencies`, `impact`, `path`, `changes` | `read` | none |
+| `graph_reconcile` | Enqueue a graphd reconcile job for a scope | `reconcile` | Enqueue graphd job |
+| `graph_job` | Job status or explicit cancel | `reconcile` | Status read; `cancel` is an explicit write |
+| `graph_verify` | Bounded verification request against an expected fingerprint or barrier | `checkpoint` | Bounded verification request |
+| `graph_version` | Selected components and their compatibility | `read` | none |
 
 `graph_reconcile`, `graph_job` and `graph_verify` are the mutation paths. They reach beyond
 the read-only plane and the gateway re-authorizes the incoming capability instead of
@@ -52,11 +39,7 @@ executes an update by default.
 
 ## `graph_reconcile` request and answer
 
-``graph_reconcile`` is the first mutation path. The seed's input set is `solution, projects,
-scope, wait_timeout_ms, reason`; this revision accepts `project_id`/`project_ids` for `projects`,
-keeps the request closed (an unexpected key is a `VALIDATION_ERROR`), and is deliberately
-*stricter* than the transport contract in one place: an audit `reason` is required, at most 200
-characters.
+`graph_reconcile` submits work to the graph daemon. Requests use `solution_id`, `scope`, optional project selectors, `wait_timeout_ms` and a required audit `reason`. Unexpected fields are refused with `VALIDATION_ERROR`.
 
 | Field | Rule |
 | --- | --- |
@@ -69,7 +52,7 @@ characters.
 The tool does not read a snapshot, parse a source file or write a shard: it authorizes, hands the
 request to the `ControlPlane` protocol, and projects the daemon's answer through a closed
 allowlist. A `202`-style answer is reported as `job` with exactly `{job_id, state,
-target_event_seq, retry_after_ms}`; the `state` must be one of the `job.schema.json` enum values,
+target_event_seq, retry_after_ms}`; the `state` must be one of the `job schema.json` enum values,
 so a non-conformant daemon is `DAEMON_UNAVAILABLE` rather than being echoed through. A
 `200`-style answer (an existing verified publication already satisfies the barrier) is reported
 as `publication` with `{catalog_generation_id, verification, dirty}`. An unreachable or unusable
@@ -108,11 +91,11 @@ Three properties are enforced here rather than delegated:
   idempotent and does not wait.
 
 The answer is `{schema_version, action, solution_id, job, warnings}`. The `job` object carries the
-`job.schema.json` fields plus `retry_after_ms`, a `terminal` boolean derived from the state, and
+`job schema.json` fields plus `retry_after_ms`, a `terminal` boolean derived from the state, and
 `progress` restricted to the documented progress units (`units_done`, `units_total`,
 `projects_done`, `projects_total`, `files_scanned`, `shards_written`). A percentage field is
 dropped and named in `warnings` (`percentage_not_carried:<key>`), because
-`contracts/control-api-v1.md` says not to invent percentages. A state outside the schema enum is
+control api v1 says not to invent percentages. A state outside the schema enum is
 `DAEMON_UNAVAILABLE` rather than echoed through.
 
 ```json
@@ -215,7 +198,7 @@ than promised.
     {
       "component": "axiom-mcp",
       "observed": true,
-      "version": "0.0.0.dev0",
+      "version": "0.1.6",
       "spec_version": "2.0.0-draft.1",
       "spec_revision": "80f44e8",
       "compatible": true,
@@ -224,7 +207,7 @@ than promised.
   ],
   "dimensions": {
     "component": "axiom-mcp",
-    "version": "0.0.0.dev0",
+    "version": "0.1.6",
     "spec_version": "2.0.0-draft.1",
     "graph_schema": 1,
     "control_api": 1,
@@ -235,7 +218,7 @@ than promised.
   "compatibility": {"compatible": true, "runtime": {}, "sdk": {}, "reasons": []},
   "update": {
     "status": "not_checked",
-    "installed": "0.0.0.dev0",
+    "installed": "0.1.6",
     "available": null,
     "compatible": null,
     "needs_restart": false,
@@ -253,7 +236,7 @@ than promised.
 
 ## `graph_query` request
 
-`contracts/schemas/query-request.schema.json` is normative. The schema is closed:
+Requests use a closed schema:
 `additionalProperties` is `false`, so an extra key is a `VALIDATION_ERROR` rather than a
 silently ignored input.
 
@@ -272,7 +255,7 @@ silently ignored input.
 | `max_bytes` | integer | `512`-`32768`, default `8192`, metadata included. |
 | `consistency` | enum | `allow_stale`, `require_fresh` or `pinned`, default `allow_stale`. |
 | `catalog_generation_id` | string | `^[0-9a-f]{64}$`. Required when `consistency` is `pinned`. |
-| `baseline_catalog_generation_id` | string | `^[0-9a-f]{64}$`. Required for `changes`. |
+| `baseline_catalog_generation_id` | string | `^[0-9a-f]{64}$`. Baseline selector for `changes`; unavailable or unpinnable baselines are reported explicitly. |
 | `cursor` | string | Opaque continuation token. |
 | `edge_kinds` | array | Unique subset of the fifteen edge kinds below. |
 | `direction` | enum | `incoming`, `outgoing` or `both`, default `both`. |
@@ -302,7 +285,7 @@ documented default.
 
 ## `graph_query` response
 
-`contracts/schemas/query-response.schema.json` is normative. A successful response carries:
+A successful query uses the response schema. A successful response carries:
 `schema_version`, `solution_id`, `catalog_generation_id`, `project_generations`,
 `freshness`, `coverage`, `verification`, `nodes`, `edges`, `truncated`, `warnings`, and
 optionally `next_cursor`.
@@ -338,7 +321,7 @@ Provenance is carried in each node's `source` location and each edge's `evidence
 `analyzer_id`. The schema deliberately has no competing `result` or `snapshot` envelope: a
 consumer that finds one is reading a non-conformant server, not an alternate shape.
 
-### Consistency at this revision
+### Consistency and freshness
 
 `allow_stale` (the default) answers from the pinned generation. A named
 `catalog_generation_id` is always honoured as a pin: when the lane no longer publishes that
@@ -509,7 +492,7 @@ free-form code is how two components start disagreeing about what happened.
 | `SNAPSHOT_CORRUPT` | tool_result | no | 500 (unnamed) |
 | `INTERNAL_ERROR` | tool_result | no | 500 |
 
-HTTP status follows `contracts/control-api-v1.md` for the codes that contract names. A code
+HTTP status follows control api v1 for the codes that contract names. A code
 the contract does not name keeps its canonical surface and reports `500` rather than
 acquiring an invented status.
 
@@ -522,7 +505,7 @@ The JSON-RPC code a protocol error maps to:
 ### Redaction and bounds
 
 Nothing prohibited reaches either surface. `AxiomError` redacts its message and detail tree
-**on construction**, following `contracts/redaction-policy.md`: source secrets and absolute
+**on construction**, following redaction policy: source secrets and absolute
 local paths are replaced with `<redacted:{category}>`, an absolute path inside the
 configured repository root becomes a repository-relative path, and the detail tree is
 bounded to depth `6`, `64` items and `2048` characters per string. Redaction runs before the
@@ -532,46 +515,29 @@ trace never crosses the boundary: only the exception *type* is recorded. See
 
 ## Sample queries
 
-Both samples are **contract examples**: they are what a conformant client sends, and at
-this revision no server answers them yet. Neither sample names a file. `graph_query` has no
-`path`, `file` or `root` input - a caller supplies a logical `solution_id` and the gateway
-resolves it through the trusted local registry, so a client cannot read an arbitrary file
-by naming one. See [snapshot-registry.md](../snapshot-registry.md).
-
-A search within one project:
+Discover the configured Axiom MCP tools in your assistant. Start with `graph_status` for the authorized solution, then search and choose an unambiguous node for a context query. Replace example scope and target values with registered IDs and values returned by the gateway. These are MCP tool arguments, not shell commands.
 
 ```json
-{
-  "solution_id": "alpha",
-  "operation": "search",
-  "query": "apply discount",
-  "project_id": "billing",
-  "max_nodes": 25,
-  "projection": ["identity", "source_locations"]
-}
+{"solution_id":"my-solution","operation":"search","query":"OrderService","max_nodes":20,"max_bytes":8192,"consistency":"allow_stale"}
 ```
 
-A pinned context query with explicit budgets:
+Use a returned node ID as the context target:
 
 ```json
-{
-  "solution_id": "alpha",
-  "operation": "context",
-  "target": "auth:AuthService.login",
-  "project_ids": ["auth-api", "billing"],
-  "depth": 2,
-  "max_nodes": 50,
-  "max_edges": 100,
-  "max_bytes": 8192,
-  "consistency": "pinned",
-  "catalog_generation_id": "7319237fdf1ce4ff27ea377c8bc3ae8cf1f115cffc71de369a373e1870ba9d1a",
-  "direction": "both"
-}
+{"solution_id":"my-solution","operation":"context","target":"<node-id-from-search>","projection":["identity","relations","source_locations","coverage"],"depth":1,"max_nodes":20,"max_edges":40,"max_bytes":8192,"consistency":"allow_stale"}
 ```
 
-The pinned sample pins one exact catalog generation, so the answer is reproducible and does
-not change while the query runs. A pinned query that names a generation which has been
-collected returns `SNAPSHOT_EXPIRED` rather than continuing against current data.
+| Operation | Additional selectors and limits |
+|---|---|
+| `search` | `query`, `max_nodes`; no traversal projection or depth |
+| `context`, `neighbors` | `target`, `depth`, `direction`, `edge_kinds`, `projection`, node/edge limits |
+| `callers`, `dependencies`, `impact` | `target`, `depth`, `edge_kinds`, `projection`, node/edge limits; no direction selector |
+| `path` | `target`, `target_to`, `depth`, `direction`, `edge_kinds`, `projection`, node/edge limits |
+| `changes` | Optional baseline generation selector; no traversal fields |
+
+All operations accept their common solution/project scope, consistency and byte budget. When specifying a traversal `projection`, include `source_locations`. Unexpected fields are validation errors. For a pinned read, set `consistency=pinned` and supply the observed `catalog_generation_id`; an unavailable pin is reported rather than silently replaced with current data.
+
+Read source only at the returned locations needed to verify the answer. Report the observed generation, coverage and truncation. `allow_stale` can observe a daemon's watcher refresh without requesting reconciliation; it does not prove live-source freshness. `require_fresh` needs reconcile capability and can return `NOT_READY` with a job handle.
 
 ## Contract versioning
 

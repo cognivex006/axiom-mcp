@@ -24,20 +24,14 @@ but an unrecognised surface is a programming error and raises.
 
 ## Canonical codes
 
-The code set is `query-response.schema.json`'s `queryError.code` enum plus the
+The code set is `query-response schema.json`'s `queryError.code` enum plus the
 three codes the read protocol adds for the states the enum does not name:
 `PROJECT_UNAVAILABLE`, `SNAPSHOT_UNAVAILABLE` and `SNAPSHOT_CORRUPT`. The module
 does not accept a code outside that set - `AxiomError("NOT_A_REAL_CODE", ...)`
 raises `ValueError` - because a free-form code is exactly how two components
 start disagreeing about what happened.
 
-`tests/test_errors.py` loads the schema from the pinned specification checkout and
-asserts that the module's set is the enum plus exactly those three codes, so an
-upstream enum change is caught here instead of drifting.
-
-HTTP status mapping follows `contracts/control-api-v1.md` for the codes that
-contract names; anything unnamed keeps its canonical surface and reports `500`
-rather than acquiring an invented status.
+Unsupported error names are rejected. HTTP status mapping is explicit; a code without a specific mapping reports `500` while retaining its Axiom error code.
 
 ## The envelope
 
@@ -53,23 +47,7 @@ decision without parsing prose.
 
 ## Redaction
 
-Redaction is not re-derived here. `contracts/redaction-policy.md` is the policy,
-and it ships an executable reference evaluator at
-`axiom-specs/tests/test_redaction_policy.py`. This module transcribes the
-detection table, the `<redacted:{category}>` placeholder, the metadata allowlist
-and the path-relativisation rule, and then proves agreement:
-
-* `tests/test_errors.py::CanonicalPolicyConformanceTests` loads the canonical
-  evaluator by path and compares, case by case, the detection table (category,
-  pattern and flags), the metadata allowlist, the absolute-path class set, and
-  `find_violations` / `redact_text` / `metadata_violations` over **every**
-  canonical fixture.
-* `release/errors_spike.py` records the same comparison as a stored artifact, so
-  the agreement is reproducible outside the test runner.
-
-That is what keeps this a consumer of the policy rather than an editable fork: a
-change to the policy that this module does not follow turns into a failing test,
-not a silent divergence.
+Responses redact sensitive content using named categories and `<redacted:{category}>` placeholders. Only allowed metadata crosses the response boundary. Absolute paths are normalized or redacted according to the configured repository root.
 
 ### What is removed
 
@@ -105,7 +83,7 @@ exception to a fixed sentence plus `details.exception_type` unless the caller
 supplies a safe message. A stack trace is a leak vector: it carries absolute
 paths, environment layout and occasionally argument values.
 
-## Verification
+## Contributor checks
 
 ```
 python -m pytest tests -q
@@ -114,6 +92,4 @@ python -m ruff format --check .
 python release/errors_spike.py
 ```
 
-`AXIOM_SPECS_ROOT` may be set to point the conformance tests at a specific
-specification checkout; otherwise a sibling `axiom-specs*` checkout is discovered
-automatically.
+See [Development](../Development.md) for contributor environment and conformance setup.

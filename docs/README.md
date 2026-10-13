@@ -1,43 +1,35 @@
-# axiom-mcp documentation
+# Axiom MCP documentation
 
-Start with [Installation and upgrade](install-and-upgrade.md), then choose [stdio](stdio-transport.md) or [HTTP](http-transport.md) for your host. These guides are owned and released with `axiom-mcp`. They describe the intended
-behavior of the gateway and record what has actually been executed; they are not
-a record of a running gateway or a certificate for any target. Resolve
-cross-component normative references through the pinned `axiom-specs` revision -
-canonical contracts live there and must not be forked as an editable copy here.
-`pack_path`-style relative links are navigation inside this repository only.
+Start with [Installation and upgrade](install-and-upgrade.md), connect your assistant, then use the [tool reference](reference/mcp.md). MCP reads graph data produced by the engine; skills provide the assistant's workflow instructions.
 
-## Transports and protocol
+| I want to… | Read |
+|---|---|
+| Install MCP or update the ecosystem | [Installation and upgrade](install-and-upgrade.md) |
+| Connect a host-managed MCP process | [stdio transport](stdio-transport.md) |
+| Run a local HTTP gateway | [HTTP transport](http-transport.md) |
+| Search code and query relationships | [Tools, arguments and examples](reference/mcp.md) |
+| Diagnose missing credentials or graph data | [Version and doctor](cli-version-and-doctor.md) |
+| Understand authentication and permissions | [Host, Origin and scoped credentials](security-host-origin-auth.md) |
+| Handle failures and redacted errors | [Errors and redaction](errors-and-redaction.md) |
+| Understand snapshot freshness and races | [Snapshot consistency](guides/snapshots.md) |
 
-- [Streamable HTTP transport](http-transport.md)
-- [stdio transport](stdio-transport.md)
-- [Query transports - JSON-first, stdio and HTTP](query-transports.md)
-- [How axiom-mcp places the official MCP SDK inside FastAPI](sdk-mount-lifecycle.md)
-- [Host, Origin and scoped bearer authentication](security-host-origin-auth.md)
+## Operations and integration
 
-## Query and read path
-
-- [Bounded query engine](query-engine.md)
-- [Snapshot reader core](snapshot-reader-core.md)
-- [How axiom-mcp turns a logical reference into a snapshot path](snapshot-registry.md)
-- [Snapshot race and read-only guide](guides/snapshots.md)
-- [Portable wire paths and native bindings](portable-paths.md)
-
-## Errors, contracts and compatibility
-
-- [MCP tools and response reference](reference/mcp.md)
-- [Errors and redaction](errors-and-redaction.md)
-- [Manifest validation - canonical bytes, digests and shard closure](manifest-validation.md)
+- [Transport choices and read behavior](query-transports.md)
+- [Locked launch documents](locked-entrypoints.md)
+- [Approved update-plan delegation](update-plan-delegation.md)
+- [Versioned runtime packaging](release-packaging.md)
 - [Runtime compatibility](runtime-compatibility.md)
 
-## Operations
+## Technical reference
 
-- [Installation and upgrade](install-and-upgrade.md)
-- [CLI: version and doctor](cli-version-and-doctor.md)
-- [Locked native entrypoints](locked-entrypoints.md)
-- [Update check and approved-plan delegation](update-plan-delegation.md)
-- [Release packaging into versioned environments](release-packaging.md)
+These pages explain the implementation for integrators and contributors:
 
-## For contributors
+- [Bounded query engine](query-engine.md)
+- [Snapshot registry and machine-local bindings](snapshot-registry.md)
+- [Snapshot reader](snapshot-reader-core.md)
+- [Manifest and shard integrity](manifest-validation.md)
+- [Portable paths](portable-paths.md)
+- [MCP SDK and FastAPI lifecycle](sdk-mount-lifecycle.md)
 
-See [Development](../Development.md) for required checks and [native verification](../tests/native/README.md) for installed-wheel testing. Versioned user-facing changes are in [Changelog](../Changelog.md).
+For the complete workflow, see [Build → watch → query](https://github.com/orchex006/axiom-skills/blob/main/docs/guides/graph-lifecycle.md). Versioned changes are in [Changelog](../Changelog.md); contribution procedures are in [Development](../Development.md).

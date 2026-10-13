@@ -1,137 +1,80 @@
 # Axiom MCP
 
-Query the Axiom code graph from your AI assistant through MCP. The gateway provides six authenticated tools over stdio or Streamable HTTP, using published graph snapshots for reads and delegating control operations to the graph daemon.
+Give your AI assistant scoped access to an Axiom code graph. The gateway exposes six tools over stdio or Streamable HTTP for bounded queries, graph status and authorized refresh requests.
 
-One portable Python 3.13 wheel supports Windows x64, Linux x64 and Intel Mac. The Axiom CLI manages ecosystem installation and OS service supervision. Apple silicon runtime verification is deferred.
+**[Get started](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md)** · **[Tools](https://github.com/orchex006/axiom-mcp/blob/main/docs/reference/mcp.md)** · **[Documentation](https://github.com/orchex006/axiom-mcp/blob/main/docs/README.md)** · **[Releases](https://github.com/orchex006/axiom-mcp/releases)**
 
-Start with [Installation and upgrade](docs/install-and-upgrade.md), [MCP tools](docs/reference/mcp.md) or [transport setup](#run). For the complete ecosystem, use the [Axiom CLI installation guide](https://github.com/orchex006/axiom-cli/blob/main/docs/INSTALL.md).
+## How it fits together
+
+| Component | Responsibility |
+|---|---|
+| [Axiom CLI](https://github.com/orchex006/axiom-cli) | Install, update and diagnose the ecosystem with `axm` |
+| [Graph engine](https://github.com/orchex006/axiom-graphd) | Build graphs from registered source and refresh them through its daemon's file watcher |
+| Axiom MCP | Answer assistant requests from published graphs; delegate authorized control operations to the daemon |
+| [Skills](https://github.com/orchex006/axiom-skills) | Teach the assistant how to build, watch and query a graph |
+
+Build the initial graph with the engine, keep it current with the daemon, then ask the assistant to query it through MCP. MCP does not parse your source or run a file watcher. Published snapshots can support reads while the daemon is offline; automatic refresh and control operations need the daemon.
 
 ## Install
 
-The interpreter line and the dependency set are declared in `pyproject.toml`; this README does not
-restate them, so the two cannot drift.
+For a complete setup, use the [Axiom installation guide](https://github.com/orchex006/axiom-cli/blob/main/docs/INSTALL.md). Check the installed ecosystem with:
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install axiom_mcp-<version>-py3-none-any.whl
+```sh
+axm version
+axm doctor
 ```
 
-To build the artifact from a checkout:
+For standalone MCP installation, download the portable wheel and `SHA256SUMS` from the same release, verify the checksum, then install the wheel in a Python 3.13 virtual environment. See [Installation and upgrade](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md) for Windows and POSIX commands.
 
-```powershell
-python -m build --wheel --no-isolation
-```
-
-The gateway reads graph data produced by `axiom-graphd`; install the graph runtime before configuring MCP. Agent plugins are installed separately through the [skills guide](https://github.com/orchex006/axiom-skills/blob/main/marketplace-plugins/README.md). No prerequisite of this component
-requires elevation, WSL, Docker, Bash or Node.js.
-
-## Verify
-
-```powershell
-axiom-mcp version          # the runtime, SDK and dimension pins this build reports
-axiom-mcp doctor           # six sections; exit 4 means "not ready", which is correct for a bare install
-```
-
-`doctor` reports `runtime`, `sdk_surface`, `protocol`, `dimensions`, `credentials` and `readiness`
-separately, and it never treats a listening socket as readiness. Exit codes: `0` ready (possibly
-with warnings), `4` not ready, `5` credential unusable or unregistered, `9` incompatible, `2`
-invalid invocation. Incompatibility is checked before not-ready.
+One Python wheel supports Windows x64, Linux x64 and Intel Mac. Apple silicon runtime verification remains deferred. Python and dependency requirements are declared in `pyproject.toml`.
 
 ## Run
 
-stdio is the default and carries protocol only on stdout, with every diagnostic on stderr:
+Use the installed environment's Python. Stdio is the usual choice when your assistant launches the gateway as a child process:
 
-```powershell
+```sh
 python -m axiom_mcp.stdio --name axiom-mcp
 ```
 
-Both public transports register all six existing graph tools. Configure `AXIOM_HOME` with the trusted registry and `AXIOM_MCP_TOKEN_REGISTRY` with scoped credential references. `AXIOM_MCP_TOKEN_REFERENCE` is a JSON reference such as `{"kind":"file","path":"<PRIVATE-CREDENTIAL-FILE>"}` for the stdio caller; the token value never belongs in project config. Without credentials, stdio discovery works but tool calls refuse `UNAUTHENTICATED`. HTTP authenticates each incoming bearer token and preserves its scope. Optional `AXIOM_CONTROL_URL` (loopback only) and `AXIOM_CONTROL_TOKEN_REFERENCE` configure the daemon control client; reads can work from valid snapshots while control is offline.
+Configure `AXIOM_HOME`, `AXIOM_MCP_TOKEN_REGISTRY` and `AXIOM_MCP_TOKEN_REFERENCE` in the host's launch environment. Keep the instance home and repository bindings consistent with the engine. Credential configuration contains private file or environment references, not token values. Follow [Connect your assistant](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md#connect-your-assistant) for an example.
 
-Stdio runs as the AI host's child process until its pipes close. HTTP runs in foreground with one worker and graceful shutdown; use the CLI's OS supervisor if background operation is needed. MCP does not install a service or require `.ps1`/`.sh` wrappers. Locked launch documents carry reviewed configuration and credential references, never copy the caller's token values. Use a private credential-file reference for locked launches.
+Tool discovery works without credentials; tool calls require registered credentials and scope. A listed server or tool is not proof of graph access.
 
-Streamable HTTP is an explicit opt-in that requires a `Host` and `Origin` allowlist; it binds
-loopback by default and refuses a non-loopback bind without an explicit acknowledgement:
+Streamable HTTP requires explicit Host and Origin allowlists:
 
-```powershell
-python -m axiom_mcp.http --name axiom-mcp --host 127.0.0.1 --port 8765 `
-  --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+```sh
+python -m axiom_mcp.http --name axiom-mcp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
 ```
 
-A host starts the gateway without a shell by consuming the launch document this surface renders —
-one absolute interpreter, an argv list, a working directory, a scoped environment and a digest:
+HTTP listens at `/mcp` and authenticates incoming bearer credentials. Use [HTTP transport](https://github.com/orchex006/axiom-mcp/blob/main/docs/http-transport.md) for setup and probes. The CLI owns background service supervision.
 
-```powershell
-axiom-mcp-entrypoints plan   --mode stdio --install-root <ABSOLUTE-ROOT> --write-lock
-axiom-mcp-entrypoints verify --mode stdio --install-root <ABSOLUTE-ROOT>
-```
+## Tools
 
-Neither transport identifies the host product: admission is by an allowlisted address and a
-scoped bearer token, not by a host name.
+| Tool | Use it to | Required capability |
+|---|---|---|
+| `graph_status` | Check coverage, generations and available capabilities | `read` |
+| `graph_query` | Search code or inspect context, callers, dependencies and impact | `read` |
+| `graph_version` | Inspect component versions and installation commands | `read` |
+| `graph_reconcile` | Request a scoped graph refresh | `reconcile` |
+| `graph_job` | Inspect a refresh job or explicitly cancel it | `reconcile` |
+| `graph_verify` | Request bounded verification against a source fingerprint or barrier | `checkpoint` |
 
-## Upgrading
+The [tool reference](https://github.com/orchex006/axiom-mcp/blob/main/docs/reference/mcp.md) documents arguments, limits and errors. Queries report generation provenance, coverage and truncation. A valid snapshot does not prove that current source was re-read. `require_fresh` needs reconcile authority and may return a pending job.
 
-A running process is never pip-upgraded in place. `axiom-mcp update check` reports what is
-installed and what is available — and never renders an unknown answer as up to date —
-and `axiom-mcp update apply --plan <plan.json>` validates an approved plan and delegates it to the
-external updater. See [update-plan-delegation](docs/update-plan-delegation.md).
+## Troubleshooting
 
-For the current core, use an `axiom update plan` document and pass its exact reviewed digest to `axiom-mcp update apply --plan <plan.json> --approve-digest <digest>`. The approval covers the entire CLI-owned ecosystem plan. MCP calls the installed native `axiom` program directly (optional absolute `AXIOM_CORE_COMMAND`), and propagates its actual outcome. The core re-verifies schema, inputs, installation ownership and approval before activation. Historical general-plan inputs are still validated and forwarded; a core that does not support their schema refuses them rather than reporting a fictitious successful update. Canonical general-plan evaluator bytes are shipped as generated immutable assets with spec revision/SHA provenance, so an installed wheel does not need a private specs checkout.
+Run `axiom-mcp version` and `axiom-mcp doctor` in the installed environment. Doctor checks credentials and query/control readiness separately; a bare installation can correctly exit `4` while configuration is incomplete.
 
-## Documentation
+| Symptom | Check |
+|---|---|
+| Tools appear but calls fail | Registered caller credentials and solution/project scope |
+| No graph data | Engine registration, published generations and matching `AXIOM_HOME` |
+| Queries work but refresh fails | Daemon/control connection and reconcile capability |
+| HTTP refuses a connection | Host/Origin allowlists and bearer authentication |
+| Stdio protocol fails | Host launch executable, argv and environment; diagnostics belong on stderr |
 
-[docs/README.md](docs/README.md) indexes the guides owned by this component. Start with
-[Installation and upgrade](docs/install-and-upgrade.md) and then:
+See [version and doctor](https://github.com/orchex006/axiom-mcp/blob/main/docs/cli-version-and-doctor.md) and [errors](https://github.com/orchex006/axiom-mcp/blob/main/docs/errors-and-redaction.md) for actionable diagnostics.
 
-| Topic | Document |
-| --- | --- |
-| Install, upgrade, rollback, refusals | [install-and-upgrade.md](docs/install-and-upgrade.md) |
-| Versioned environments and the lockfile | [release-packaging.md](docs/release-packaging.md) |
-| CLI `version` and `doctor` | [cli-version-and-doctor.md](docs/cli-version-and-doctor.md) |
-| Locked native entrypoints | [locked-entrypoints.md](docs/locked-entrypoints.md) |
-| Update check and approved-plan delegation | [update-plan-delegation.md](docs/update-plan-delegation.md) |
-| stdio and Streamable HTTP transports | [stdio-transport.md](docs/stdio-transport.md), [http-transport.md](docs/http-transport.md) |
-| Host, Origin and bearer-token policy | [security-host-origin-auth.md](docs/security-host-origin-auth.md) |
-| Tool catalog and response shapes | [reference/mcp.md](docs/reference/mcp.md) |
-| Runtime and SDK pin | [runtime-compatibility.md](docs/runtime-compatibility.md) |
+## Contributing
 
-This README ships inside the installed package as `axiom_mcp/README.md`. The `docs/` tree does
-not: it is repository documentation, so the links above resolve against a checkout of this
-repository rather than inside a package-only install. Read this file for the install, verify and
-launch path, and follow the links when you have the source tree.
-
-Documentation for code is owned here and changes in the same branch as the code. Shared normative
-contracts stay canonical in `axiom-specs` and are resolved through the pinned revision — the
-immutable pin and its contract digests are recorded in `spec.lock.json` — never as a local editable
-copy.
-
-## Command and ownership boundaries
-
-The CLI registers `version`, `doctor` and `update check|apply`; the other subcommands in the
-canonical CLI contract are not exposed by this package, and an unregistered subcommand exits `2`. No daemon,
-publication or GC runtime exists here — the writer side is `axiom-graphd`. This package does not expose ecosystem removal; use `axm uninstall` for a CLI-managed installation. `release/package.py` is operator tooling and is
-not part of the installed distribution. [Installation and upgrade](docs/install-and-upgrade.md)
-section 11 carries the complete list.
-
-## Development
-
-This repository's required checks are:
-
-```bash
-python -m pytest tests -q
-python -m ruff check .
-python -m ruff format --check .
-```
-
-Every task runs all three against the final bytes and records the real command and exit code; a
-check that did not run is recorded as unverified and never reported as passing.
-
-## Ownership and platform status
-
-This component owns the MCP server surface — the tool catalog, the bounded query engine, the
-snapshot registry and reader, the reader/writer guard, redaction and the error envelope, the two
-transports, and the `version`/`doctor`/`update` CLI with the locked launch entrypoints. It does
-**not** own the graph runtime (`axiom-graphd`), the ecosystem contracts (`axiom-specs`) or the
-skills (`axiom-skills`): public commands, schema and layout versions, the control API, guard
-semantics and migration decisions change in `axiom-specs` first.
-
-Native installed-wheel verification covers Windows x64, Linux x64 and Mac Intel installed-wheel proof; Mac ARM is deferred. One owner wheel is shared by all lanes; native dependency wheels are resolved by pip for the host.  Native MCP protocol tests do not claim licensed AI host applications were exercised.
+See [Development](https://github.com/orchex006/axiom-mcp/blob/main/Development.md) for contributor checks and [Changelog](https://github.com/orchex006/axiom-mcp/blob/main/Changelog.md) for release changes. This README also ships inside the wheel; documentation links point to the public repository so they work outside a source checkout.

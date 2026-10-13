@@ -5,8 +5,7 @@ The portable gateway carries only reviewed AXIOM_HOME, token registry/reference 
 `src/axiom_mcp/entrypoints.py` is the launch surface for a host that must start the
 gateway **without a shell**. A host does not activate a virtual environment, does not
 source a script and does not quote a command line: it launches one absolute
-interpreter with an argument vector. This document records that implementation; the
-distribution, update and compatibility contracts stay in `axiom-specs`.
+interpreter with an argument vector. This document records that implementation; the launch environment preserves reviewed installation and credential configuration.
 Companion documents: `docs/release-packaging.md` (the packager that owns the
 install-root layout), `docs/runtime-compatibility.md` (the Python and SDK pin) and
 `docs/query-transports.md` (how a plan mode maps to a transport and its argv).

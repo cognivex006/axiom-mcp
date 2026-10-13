@@ -1,15 +1,6 @@
 # Query transports — JSON-first, stdio and HTTP
 
-Owner: `axiom-mcp`. Contract: `repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` sections 2, 4, 5, 6,
-7 and 9 at the pinned `axiom-specs` revision; `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` fixes the
-read protocol the transports carry; `contracts/control-api-v1.md` fixes the canonical codes and
-their status. This document records implementation, not policy.
-
-Companion documents: [stdio-transport.md](stdio-transport.md) (the JSON-only stdio transport),
-[http-transport.md](http-transport.md) (the Streamable HTTP transport),
-[locked-entrypoints.md](locked-entrypoints.md) (the launch document and the refusal table),
-[query-engine.md](query-engine.md) (the bounded query core both transports sit on) and
-[guides/snapshots.md](guides/snapshots.md) (the snapshot race and read-only semantics).
+Stdio and Streamable HTTP expose the same graph tools and query core. Choose a transport for your host; generation consistency, authorization and response budgets apply to both.
 
 ## What "JSON-first" means here
 
@@ -24,7 +15,7 @@ several files itself holds no reader registration and no lock, so nothing coordi
 collector or with a Git checkout, and it is not covered by the coordinated reader guarantee. A
 direct reader stays correct only by pinning one immutable generation, validating every manifest
 and shard hash, and reporting a missing or collected generation instead of combining a second
-generation into the result - re-reading `current.json` per shard is the `SNP-03` failure. The
+generation into the result - re-reading `current.json` per shard mixes generations. The
 full statement of that rule is [guides/snapshots.md](guides/snapshots.md); this document does not
 restate the protocol, it records which surfaces carry it.
 
@@ -112,19 +103,16 @@ is not evidence that the source is fresh.
   rejects any code outside it, so a failure surfaces as the code that describes it rather than as
   a generic transport error.
 - **`SNAPSHOT_CORRUPT` has no contracted HTTP status.** The status map lists only the codes
-  `contracts/control-api-v1.md` names; an unlisted code keeps its surface and is not given an
+  control api v1 names; an unlisted code keeps its surface and is not given an
   invented status.
 - **Coverage is not yet an exit code.** `cli.py` declares `EXIT_PARTIAL = 20`, but no code path
   maps a `partial` coverage status to it at this revision; the coverage key in the response is
   the signal a host should read.
-- **The `axiom-mcp` snapshot-reader CLI is not registered at this revision.** The reading library
-  exists (`read_session.py`, `cache.py`), but `src/axiom_mcp/cli.py` registers only `version` and
-  `doctor`; the remaining subcommands in `docs/16-CLI-AND-CONTROL-API.md` section 3 belong to
-  later tasks, and an unregistered subcommand exits `2` instead of being ignored.
+- **Use MCP tools for graph queries.** The CLI exposes `version`, `doctor` and `update check|apply`; graph reads use the MCP tool connection. An unsupported CLI subcommand exits `2`.
 - **No daemon, publication or GC runtime exists in this repository.** `axiom-mcp` reads snapshots
   and drives the control API; the writer side is `axiom-graphd`.
 
-## Verification
+## Contributor checks
 
 `tests/test_stdio_transport.py`, `tests/test_http_transport.py`, `tests/test_entrypoints.py`,
 `tests/test_read_session.py`, `tests/test_query_envelope.py` and `tests/test_errors.py` are the

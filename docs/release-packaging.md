@@ -96,7 +96,7 @@ python release/package.py status   --install-root ROOT
 `main` prints JSON only: a payload on success (`exit 0`) or
 `{"error": code, "detail": ...}` on refusal (`exit 1`).
 
-## Verification
+## Contributor checks
 
 `tests/test_release_package.py` proves AC1 on this host with the real thing: two wheels
 are built with the real build backend, installed by the real pip into two isolated

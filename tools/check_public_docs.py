@@ -10,15 +10,27 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PRIVATE_ID = re.compile(
-    r"(?<![A-Za-z0-9])(?:[A-Z]-\d{3}(?:-\d+)?|V2-\d{3}|ADR-\d{4}|R\d{2}|W\d+-[A-Z][A-Z-]+)(?![A-Za-z0-9])"
+    r"(?<![A-Za-z0-9])(?:[A-Z]-\d{3}(?:-\d+)?|V2-\d{3}|ADR-\d{4}|R\d{2}|(?:SNP|CP)-\d{2}|W\d+-[A-Z][A-Z-]+)(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
+PRIVATE_REFERENCE = re.compile(
+    r"(?:repo-seeds/|axiom-specs/|contracts/(?:schemas/)?[A-Za-z0-9._/-]+"
+    r"|docs/\d{2}-[A-Z][A-Z0-9-]*\.md)",
+    re.IGNORECASE,
 )
 
 
 def findings(name: str, text: str) -> list[str]:
-    return [
+    errors = [
         f"{name}:{text.count(chr(10), 0, match.start()) + 1}: private identifier {match.group()}"
         for match in PRIVATE_ID.finditer(text)
     ]
+    errors.extend(
+        f"{name}:{text.count(chr(10), 0, match.start()) + 1}: "
+        f"internal specification reference {match.group()}"
+        for match in PRIVATE_REFERENCE.finditer(text)
+    )
+    return errors
 
 
 def public_documents(root: Path) -> list[Path]:

@@ -1,22 +1,19 @@
 # Runtime compatibility — axiom-mcp
 
-Local implementation documentation for the pinned Python runtime and the official
-MCP SDK. The canonical contract stays in `axiom-specs`; this file only records how
-this component implements the pin.
+The gateway uses Python 3.13 and pinned dependencies. Read `axiom-mcp version` for the installed runtime and compatibility dimensions; `pyproject.toml` declares the package requirements.
 
 ## Pinned surface
 
 | Item | Pinned value | Source |
 | --- | --- | --- |
-| Python | `>=3.13,<3.14` (verified on 3.13.14) | `pyproject.toml` / `axiom_mcp.version` |
+| Python | `>=3.13,<3.14`  | `pyproject.toml` / `axiom_mcp.version` |
 | Official MCP SDK | `mcp==1.28.1` | `pyproject.toml` / `axiom_mcp.version` |
 | FastAPI / Uvicorn / Starlette | `0.139.2` / `0.51.0` / `1.3.1` | `pyproject.toml` |
 | Pydantic / anyio / httpx | `2.13.4` / `4.14.2` / `0.28.1` | `pyproject.toml` |
 | Minimum protocol revision | `2025-11-25` | `axiom_mcp.version.MCP_PROTOCOL_MINIMUM` |
 
 Graph payload schema `1`, control API `1` and queue schema `1` are independent
-integer-major dimensions copied from `contracts/version-dimensions.json`; they are
-reported, never invented here.
+integer-major compatibility dimensions reported by the installed package.
 
 ## SDK compatibility checks
 
@@ -59,3 +56,9 @@ python -m pytest tests -q
 `axiom_mcp.version.runtime_pin_reasons()` is the shared predicate that `axiom-mcp
 doctor` reports. Re-pinning requires a new spike, new artifacts and an
 updated `spec.lock.json` review; it is never inferred from a build timestamp.
+
+## Platform and host support
+
+The portable wheel supports Windows x64, Linux x64 and Intel Mac with native platform guards. Apple silicon runtime verification is deferred. MCP protocol support does not establish integration with every assistant product or version; verify discovery and an authenticated scoped query in the selected host.
+
+Use [installation](install-and-upgrade.md) for setup and [version and doctor](cli-version-and-doctor.md) for installed-runtime diagnostics.

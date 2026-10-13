@@ -1,31 +1,19 @@
 # Snapshot race and read-only guide
 
-Owner: `axiom-mcp`. Normative sources live in `axiom-specs`:
-`docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` fixes the publication, read and race-condition
-protocol; `contracts/native-reader-writer-guards.md` fixes the cooperative lock ABI;
-`SOURCE-OF-TRUST.md` section 5 fixes the machine-local layout. This guide explains how a
-reader stays correct while a publisher is writing, and it consumes those documents rather
-than redefining them.
-
-**Scope of the guarantee.** The protocol protects cooperating readers and writers of the
-ecosystem. A Git checkout, an editor, an antivirus process or any third-party process does
-not hold the guard, so a reader must still treat a missing or corrupt file as a recoverable
-state. The implementation half of this guide - the native guard engine, the registry, the
-manifest validator - is described against the code at this revision, and the sections that
-are specified but not yet implemented say so explicitly.
+Published graph generations are immutable. This guide explains how MCP reads them consistently while the graph daemon publishes changes or collects old data. It covers reader guarantees and the limits of cooperating processes.
 
 ## Invariants
 
-| Id | Invariant |
+| Guarantee | Meaning |
 | --- | --- |
-| SNP-01 | A published generation is immutable. A published file is never reopened for truncate or write. |
-| SNP-02 | The current pointer references only a generation that is complete, schema-valid and checksum-valid. |
-| SNP-03 | One query uses exactly one generation vector. It never re-reads `current.json` per shard and admits a second generation. |
-| SNP-04 | A SQLite commit and a filesystem publish are not one distributed transaction; a durable outbox plus idempotent recovery bridges them. |
-| SNP-05 | Readers and GC must coordinate across processes. An atomic rename alone does not stop a generation being collected mid-read. |
-| SNP-06 | A solution catalog carries a `(project_id, generation_id, source_fingerprint)` vector for every available member; a missing project is reported `partial`, never an invented empty graph. |
-| SNP-07 | Publishing several repositories is not atomic; the catalog pointer is the read-model commit point, not a transaction over source repositories. |
-| SNP-08 | Identical inputs, toolchain and profile produce identical canonical content bytes; timestamp and local sequence are not part of a generation's identity. |
+| Immutable generations | A published generation is immutable. A published file is never reopened for truncate or write. |
+| Validated publication | The current pointer references only a generation that is complete, schema-valid and checksum-valid. |
+| One generation per query | One query uses exactly one generation vector. It never re-reads `current.json` per shard and admits a second generation. |
+| Durable publication recovery | A SQLite commit and a filesystem publish are not one distributed transaction; a durable outbox plus idempotent recovery bridges them. |
+| Reader and collector coordination | Readers and GC must coordinate across processes. An atomic rename alone does not stop a generation being collected mid-read. |
+| Explicit partial coverage | A solution catalog carries a `(project_id, generation_id, source_fingerprint)` vector for every available member; a missing project is reported `partial`, never an invented empty graph. |
+| Catalog publication boundary | Publishing several repositories is not atomic; the catalog pointer is the read-model commit point, not a transaction over source repositories. |
+| Deterministic content | Identical inputs, toolchain and profile produce identical canonical content bytes; timestamp and local sequence are not part of a generation's identity. |
 
 ## Pin one generation
 
@@ -51,14 +39,14 @@ response reports freshness separately.
 Three facts make a naive reader wrong, and each maps to one invariant:
 
 - **Commit and publish are two systems.** A SQLite write transaction and the filesystem
-  publish are not one distributed transaction (SNP-04). A generation can therefore exist in
+  publish are not one distributed transaction . A generation can therefore exist in
   the database and not yet on disk, or on disk and not yet pointed at. The durable outbox
   plus idempotent recovery is what makes that window recoverable.
 - **A rename is not a reservation.** Moving a staging directory into place is atomic for the
   directory entry, but it does not stop the collector from removing the generation a moment
-  later (SNP-05). Only a shared guard held across the copy coordinates the reader with GC.
+  later . Only a shared guard held across the copy coordinates the reader with GC.
 - **Repositories publish independently.** A multi-repository solution is not published as
-  one atomic batch (SNP-07). The catalog pointer is the read-model commit point; individual
+  one atomic batch . The catalog pointer is the read-model commit point; individual
   project pointers can advance while the catalog still pins an older vector, and a
   solution-level query legitimately continues to use that old vector until the catalog job
   republishes.
@@ -108,7 +96,7 @@ symlink planted inside a lane cannot escape it. `.staging/` is never a read sour
 ## Guarded reading
 
 `src/axiom_mcp/guard/` implements the Python side of the frozen protocol in
-`contracts/native-reader-writer-guards.md`. It contains no policy of its own: it uses the
+native reader writer guards. It contains no policy of its own: it uses the
 same two lock files, the same order and the same bounded wait that the Rust side is
 required to implement, so a publisher written in one language and a reader written in the
 other stay safe over the same files.
@@ -154,7 +142,7 @@ rather than locked as if it were the named file.
 
 ## Generations and immutability
 
-A published generation under `generations/<generation-id>/` is immutable (SNP-01). The
+A published generation under `generations/<generation-id>/` is immutable . The
 directory name is the generation's own manifest digest, so a directory that does not hold
 the digest it is named for is refused before the pointer is trusted. Re-publishing an
 existing generation verifies its contents match before reusing it instead of overwriting it.
@@ -226,52 +214,15 @@ Reading the JSON files directly is allowed, but it is **not** the same guarantee
 reader that opens several files itself holds no reader registration and no lock, so nothing
 coordinates it with GC or with a Git checkout, and it is not covered by the coordinated
 reader availability guarantee. It is not safe to reconstitute a multi-file answer by
-opening `current.json` again for each file - that is exactly the SNP-03 failure.
+opening `current.json` again for each file - that is exactly the mixed-generation read failure.
 
-A direct reader retains consistency only by following all of these: pin one immutable
-generation, validate every manifest and shard hash, and report a missing or collected
-generation instead of combining another generation into the result. When that is not enough -
-or when the guarantee matters - use a guard-aware path: the `axiom-graphd snapshot read`
-helper, or the `axiom-mcp` snapshot-reader library or CLI, which holds the shared guard
-across the bounded copy. `axiom-graphd snapshot export --generation <id> --out <directory>`
-produces a standalone immutable copy the user owns for offline reading, validated on export;
-an export is never a silent full-graph dump by default. Optional MCP is not optional
-consistency.
+A direct reader must pin one immutable generation, validate its manifest and shard hashes, and report missing data instead of mixing generations. Assistant queries should use MCP tools, whose reader holds the shared guard during the bounded copy. MCP does not expose a snapshot-reader CLI subcommand.
 
-## Unverified / limits
+## Guarantees and limits
 
-- **The native guard engine ships as code on both platforms.** It is not the only implemented
-  part of this guide - the registry and the manifest validator are implemented and tested on
-  their own, as noted below - and `src/axiom_mcp/guard/` contains both backends:
-  `locks_posix.py` (`flock`, whole-file) and `locks_windows.py` (`LockFileEx`, byte range
-  offset 0 length 1), behind the shared `engine.py`, `protocol.py` and `adapter.py`. The
-  Windows backend is present at this revision and is exercised against the real primitive by
-  `tests/test_guard_windows.py` on this host, including exclusion observed between two
-  independent processes.
-- **Cross-language interoperability with the Rust holder is unverified here.** Python reader
-  and writer exclusion is observed between two real processes on Windows, but the required
-  Rust holder versus Python holder exclusion has not been run: the foreign-holder leg of
-  `tests/test_guard_cross_language.py` skips unless `AXIOM_GUARD_HOLDER_ARGV` names an
-  ABI-conformant holder, and the local Windows cross-language run used a non-Python
-  (`LockFileEx`) holder rather than the `axiom-graphd` daemon. The POSIX holder target is
-  likewise unverified on this host.
-- **The POSIX guard tests skip where `fcntl` is unavailable**, so this revision's Windows test
-  run does not exercise the POSIX `flock` primitive. The POSIX backend exists as code
-  (`locks_posix.py`) but is not executed on this host; only the Windows backend is certified
-  by this revision's run.
-- **No GC, daemon or publication runtime exists in this repository.** Retention, disk-full
-  behaviour and outbox recovery are specified in the protocol; nothing here implements or
-  has observed them.
-- **The reader session and the cache ship as code, with their limits stated rather than
-  implied.** `src/axiom_mcp/read_session.py` copies the pointer, the manifest and the required
-  shards under the shared guard and releases the guard before any response work;
-  `guard_held_during_copy` and `parsed_after_guard_release` are recorded on the snapshot, so
-  the phase split is observable instead of assumed. `src/axiom_mcp/cache.py` keys its bounded
-  LRU by immutable generation identity and never by a pointer, so a moved pointer cannot hit
-  the previous generation's entry. The manifest validator (`src/axiom_mcp/manifest.py`) and
-  the registry (`src/axiom_mcp/registry.py`) remain implemented and tested on their own. What
-  no module here implements is the writer's half: the daemon, the publication outbox and GC
-  are `axiom-graphd` work, as the item above records.
-- **Platform coverage.** Verified on Windows with this repository's interpreter only; no
-  Linux, macOS, CI, installed-wheel or native certification was performed, and the release
-  gate stays closed.
+- The native guard engine ships both `locks_posix.py` (`flock`, whole-file) and `locks_windows.py` (`LockFileEx`, byte range offset 0 length 1). `engine.py`, `protocol.py` and `adapter.py` share the reader protocol. The Windows backend is present at this revision; platform-specific tests exercise the primitive on its native OS.
+- Cross-language guard tests require an ABI-compatible native holder configured with `AXIOM_GUARD_HOLDER_ARGV`. A skipped holder test is not interoperability evidence.
+- `read_session.py` copies the pointer, manifest and required shards under the shared guard and releases it before response work. `cache.py` keys entries by immutable generation identity. `manifest.py` validates bytes and `registry.py` resolves registered paths.
+- The graph daemon owns publication, retention, garbage collection and outbox recovery. MCP does not implement that writer lifecycle.
+- Third-party processes such as Git, editors and antivirus tools do not necessarily hold the guard. Missing or changed data is still a recoverable failure, not permission to combine generations.
+- Windows x64, Linux x64 and Intel Mac use native platform guards. See [runtime compatibility](../runtime-compatibility.md) for Python requirements and deferred targets. Protocol verification does not establish integration with every assistant product.

@@ -11,10 +11,10 @@ answer three questions with evidence instead of assumption:
   ambient interpreter that merely happens to be reachable through ``PATH``;
 * **how it is launched** - an executable, an argument vector, a working directory
   and a scoped environment; never a shell string and never an activation script
-  (cross-platform CP-02 and CP-09);
+  using the host-native interpreter and arguments;
 * **what it may expose** - stdio by default, HTTP only as an explicit opt-in that
   binds loopback and carries a non-wildcard Host/Origin allowlist that admits its
-  own bind address (CP-09).
+  own bind address.
 
 Everything here is a *plan*. This module starts no server and opens no socket: it
 resolves, verifies and refuses. The one subprocess it runs is the interpreter

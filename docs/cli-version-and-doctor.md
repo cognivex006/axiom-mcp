@@ -1,16 +1,6 @@
 # CLI: version and doctor
 
-`src/axiom_mcp/cli.py` is the console entry point declared by `pyproject.toml`
-(`axiom-mcp = "axiom_mcp.cli:main"`). This revision implements the two
-diagnostic subcommands, `version` and `doctor`. The remaining subcommands in
-`docs/16-CLI-AND-CONTROL-API.md` section 3 belong to later tasks; a name that is
-not registered exits with the validation code instead of being ignored, which is
-what the contract's shared CLI section requires.
-
-```
-axiom-mcp version [--json]
-axiom-mcp doctor  [--json] [--registry PATH]
-```
+Inspect the installed gateway and diagnose runtime, credential and graph-readiness problems. The public CLI provides `version`, `doctor` and `update check|apply`. Unsupported subcommands exit with validation code `2`.
 
 ## Shared behaviour
 
@@ -20,11 +10,11 @@ axiom-mcp doctor  [--json] [--registry PATH]
 - Diagnostics go to stderr. An invalid flag or an unregistered subcommand writes
   a message to stderr and exits `2`; argument parsing never silently ignores a
   flag.
-- Exit codes are the canonical set from section 6 of the CLI contract.
+- Exit codes are listed below.
 
 ## version
 
-`version` renders `contracts/schemas/version-report.schema.json` and nothing
+`version` renders the version report schema and nothing
 more: exactly the eight required fields, no extra key.
 
 ```
@@ -32,12 +22,7 @@ component, version, spec_version, graph_schema, control_api,
 queue_schema, build_revision, update_status
 ```
 
-`build_revision` prefers the `AXIOM_MCP_BUILD_REVISION` setting and otherwise
-probes the checkout, falling back to the literal `unknown`. A released artifact
-carries no checkout, so the explicit setting is authoritative; the probe exists
-for a developer tree. `update_status` is `not_checked` here because the update
-plane is a separate task and this command must not imply an update check it did
-not perform.
+`build_revision` uses the configured revision, the revision stamped into a released wheel, or a checkout probe, falling back to `unknown` when none is available. `update_status` is `not_checked`: inspecting a version does not run an update check.
 
 `version` always exits `0`.
 
@@ -56,7 +41,7 @@ The report keeps them apart. Six sections are always present, in this order:
 | `runtime` | Python line, the pinned MCP SDK, and every pinned runtime dependency beside the installed version. | The Python line is outside the pin, the SDK is not installed or is a different version, or a pinned dependency is missing or differs. |
 | `sdk_surface` | The pinned SDK names, methods, parameters and fields the component depends on. | Any locked name, parameter or field is absent from the installed SDK. |
 | `protocol` | The revisions the installed SDK advertises and the minimum this component requires. | The advertisement is empty or does not include the minimum. |
-| `dimensions` | The canonical version dimensions from the pinned specification, including the graph schema major the gateway accepts. | A dimension is missing or unusable. |
+| `dimensions` | The supported compatibility dimensions, including the graph schema major the gateway accepts. | A dimension is missing or unusable. |
 | `credentials` | The audience, capabilities and tool-to-capability map the gateway enforces, plus the configured credential reference and, when a registry is supplied, the scope the credential actually carries. | A named reference does not resolve, or resolves to a credential the registry does not know. |
 | `readiness` | Query and control plane availability, reported separately. | Either plane is unavailable. |
 
@@ -127,7 +112,7 @@ repository root is redacted through the same policy `axiom_mcp.errors` enforces.
 Incompatibility is checked before not-ready, so a machine with a wrong SDK
 reports `9` rather than a less specific `4`.
 
-## Verification
+## Contributor checks
 
 ```
 python -m pytest tests -q

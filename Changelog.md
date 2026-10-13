@@ -4,15 +4,22 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
-Changes after the latest release are recorded here.
+### Documentation
+
+- Reorganize MCP setup around installation, assistant connection, scoped graph queries and troubleshooting. Explain the engine, watcher and MCP responsibilities and distinguish tool discovery from authenticated access.
+- Remove internal tracking labels, private specification paths and obsolete development transcripts from public guides. Add operation-specific query examples and current platform guidance.
+
+### Chores
+
+- Extend documentation checks to reject internal invariant labels and numbered specification references in guides, release notes and wheel descriptions.
 
 ## 0.1.6
 
 ### Documentation
 
-- Remove internal development identifiers from public guides, tool tables, release descriptions and packaged documentation. Describe tools and query operations by their names.
-- Correct stale registration status: both public transports register all six graph tools. Explain discovery, authentication and graph readiness separately.
-- Organize release changes by version and preserve historical development records internally.
+- Describe public graph tools by name and clarify setup, authentication and readiness in guides and packaged documentation.
+- Clarify that stdio and Streamable HTTP expose all six graph tools; discovering a tool does not prove authenticated graph access.
+- Group release changes by version with links to the corresponding source comparison.
 
 ### Chores
 

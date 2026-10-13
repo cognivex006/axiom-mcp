@@ -11,22 +11,14 @@ reader actually performs, instead of assumptions it hopes hold:
    record count - and its own identity is `sha256` over its canonical bytes;
 3. each shard is pinned by the manifest entry that names it.
 
-Nothing here is invented. The canonical byte rule is
-`docs/11-GRAPH-DATA-CONTRACT.md` section 5 in `axiom-specs`; the structural shape is
-`contracts/schemas/project-manifest.schema.json` and `contracts/schemas/pointer.schema.json`;
-the `(project_id, generation_id, source_fingerprint)` vector and the refusal to substitute
-a project's newest generation come from `docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md`
-sections 1 and 5 (SNP-03, SNP-06); and the `generations/<hash>/` directory name is the
-path contract in section 2. The module uses only `json`, `hashlib` and `re`, so it works
-offline and in a snapshot-only gateway with no daemon running.
+The reader validates generation identity, the project generation vector and every declared shard before serving data. Validation uses standard-library JSON and hashing and works with published snapshots while the daemon is offline.
 
 ## Canonical bytes
 
 `canonical_text` / `canonical_bytes` produce UTF-8 without a BOM, LF newlines,
 lexicographically sorted object keys, compact separators, one trailing LF for a metadata
 document, and Unicode preserved exactly as supplied. `canonicalization_reasons` refuses a
-float and a non-string object key, which is the rule the specs-side reference serializer
-`tools/canonical_json.py` enforces. `generation_id(manifest)` is
+float and a non-string object key, which keeps generation identities deterministic. `generation_id(manifest)` is
 `sha256(canonical_bytes(manifest))`, so a manifest never references its own hash and the
 generation directory name, the pointer's `generation_id` and the pointer's
 `manifest_sha256` are all the same string in V2.
@@ -80,29 +72,10 @@ when the shard is a single JSON object. That is the rule the shipped
 `examples/snapshots` generations support: their `nodes`/`edges` shards are arrays and
 their `coverage.json` is one object. A shard that is neither an array nor an object is
 refused instead of guessed at. A future role whose shard is an object *map* would need a
-canonical count rule from `axiom-specs` before this reader could count it.
+a supported record-count rule before this reader could count it.
 
-## Tests and fixtures
+## Contributor checks
 
-`tests/test_manifest.py` pins this module against bytes it did not produce, and asserts
-each fixture's SHA-256 so a silent fixture edit fails the suite:
+`tests/test_manifest.py` verifies canonical bytes, pointer/manifest agreement, shard hashes and record counts against fixed fixtures. Negative cases reject altered bytes, unsupported metadata, missing shards and mismatched generation identities.
 
-* `tests/fixtures/canonical/` vendors the four `metadata`-form canonical vectors from
-  `axiom-specs` `conformance/fixtures/canonical/` (pinned specification revision
-  `80f44e836ced442e8f3ea33d167bd369ed6796bc`). Their `input.json` is deliberately
-  non-canonical and their `expected.canonical.json` is the pinned expected byte sequence.
-  The two `identity-tuple` vectors of that corpus are a different form that this reader
-  does not implement and are not vendored.
-* `tests/fixtures/generation/auth-api/` vendors one shipped example generation. Its
-  `manifest.json` hashes to its own generation directory name
-  `7319237fdf1ce4ff27ea377c8bc3ae8cf1f115cffc71de369a373e1870ba9d1a`, so the fixture
-  carries an identity claim this module did not compute.
-
-## Limitations
-
-Vendored fixtures are byte copies for test input; they are not a promoted shared contract
-fixture, and no `axiom-specs` fixture index, ownership file or digest is changed by this
-repository. Verified on Windows with the repository's own interpreter only: no Linux,
-macOS, CI, installed-wheel or clean-venv run was performed, and the release gate stays
-closed. Locking, caching, recovery and reader-session behaviour are other tasks; this
-module reads bytes and verifies digests, and does not take the shared guard itself.
+Run the repository checks in [Development](../Development.md) when changing this reader. For the consumer-facing result shapes, see [MCP tools](reference/mcp.md).

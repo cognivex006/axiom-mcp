@@ -1,8 +1,4 @@
-"""How axiom-mcp turns a logical reference into a snapshot path.
-
-Owner: `axiom-mcp`. Consumes `SOURCE-OF-TRUST.md` section 5,
-`docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 2 and
-`contracts/native-reader-writer-guards.md` section 1.
+# Snapshot registry and local bindings
 
 ## The rule
 
@@ -80,7 +76,7 @@ which is the honest answer on a machine that has registered no solution.
 
 ## Guard directory and lock files
 
-`contracts/native-reader-writer-guards.md` fixes exactly two stable lock files
+native reader writer guards fixes exactly two stable lock files
 per registered instance:
 
 ```text
@@ -108,10 +104,9 @@ cannot be used to read a file outside it and the reference is refused before a f
 is opened. See `docs/portable-paths.md` for the wire-path/native-binding split. `.staging/` is never a read
 source: it is named here only so a caller can tell it apart from a generation.
 
-## Not in this slice
+## Responsibilities
 
 This module resolves locations. It does not read, validate, cache or lock
 anything; the shard reader, the manifest validator, the native guards and the
-recovery policy are later slices in the same work package. It does not contact a
+recovery policy are separate reader components. It does not contact a
 daemon, so an offline checkpoint lane resolves exactly like a live one.
-"""

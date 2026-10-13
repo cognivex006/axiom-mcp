@@ -1,13 +1,6 @@
 # Host, Origin and scoped bearer authentication
 
-Owner: `axiom-mcp` (implementation) · canonical policy: `axiom-specs`
-`docs/23-SECURITY-AND-TRUST.md`, `contracts/cross-platform-v2.md` CP-09,
-`docs/12-SNAPSHOT-READ-WRITE-PROTOCOL.md` section 5 step 1,
-`repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` section 8.
-
-`src/axiom_mcp/security.py` owns the HTTP policy for the gateway. The transport
-assembly in `src/axiom_mcp/http.py` and the SDK mount in
-`src/axiom_mcp/sdk_compat.py` remain wiring.
+The gateway checks HTTP Host/Origin allowlists and authorizes each caller for declared capabilities and solution/project scope. Stdio uses a registered caller credential reference. See [connection setup](install-and-upgrade.md#connect-your-assistant).
 
 ## Why a loopback bind is not a security control
 
@@ -84,24 +77,16 @@ widen a policy this module owns.
 
 ## Errors
 
-Refusals use the canonical codes from `contracts/control-api-v1.md`:
+Refusals use the canonical codes from control api v1:
 `VALIDATION_ERROR` 400, `UNAUTHENTICATED` 401, `FORBIDDEN` 403. The envelope is
 `{code, message, retryable, details, request_id}` and never carries raw source,
 a token, a stack trace or an unregistered absolute path.
 
-## Verified on this host
 
-`release/security_spike.py` drives a real loopback gateway and records what it
-observed rather than what it intends: an authenticated handshake succeeded while
-a disallowed `Host`, a disallowed `Origin`, a missing token, a control-audience
-token, a read token requesting reconciliation and a read token naming another
-solution were each refused. See the retained internal verification record.
+## Guarantees and limits
 
-## Unverified / limits
-
-- Windows is the only host exercised. No Linux or macOS run, no CI run and no
-  clean-venv install were performed.
+- Supported native x64 targets and runtime requirements are described in [runtime compatibility](runtime-compatibility.md). Host application integration is a separate check.
 - Body buffering is bounded but not streamed for an oversized POST: the request
   is refused, not truncated and answered.
 - Credential files are resolved without an ACL check; owner-only permission
-  enforcement belongs to the installer/doctor slice.
+  enforcement belongs to installation and diagnostics.

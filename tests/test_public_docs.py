@@ -49,7 +49,10 @@ def test_current_public_docs_and_tool_descriptions_are_clean():
         assert GUARD.findings(tool.name, tool.summary) == []
 
 
-@pytest.mark.parametrize("identifier", ["C-028", "K-001", "ADR-0031", "V2-031", "R07"])
+@pytest.mark.parametrize(
+    "identifier",
+    ["C-028", "K-001", "ADR-0031", "V2-031", "R07", "SNP-03", "CP-02", "k-001.md"],
+)
 def test_nested_public_guide_identifier_is_rejected(tmp_path, identifier):
     root = fixture(tmp_path)
     path = root / "docs/new/nested.md"
@@ -58,11 +61,29 @@ def test_nested_public_guide_identifier_is_rejected(tmp_path, identifier):
     assert any(identifier in item for item in GUARD.check(root))
 
 
+@pytest.mark.parametrize(
+    "reference",
+    [
+        "docs/17-FASTAPI-MCP.md",
+        "docs/17-fastapi-mcp.md",
+        "repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md",
+        "axiom-specs/contracts/control-api-v1.md",
+        "contracts/schemas/query-request.schema.json",
+        "tasks/K/K-001.md",
+    ],
+)
+def test_internal_specification_paths_are_rejected(tmp_path, reference):
+    root = fixture(tmp_path)
+    (root / "docs/internal-link.md").write_text(f"Read `{reference}` before using MCP.\n")
+    assert GUARD.check(root)
+
+
 def test_protocol_versions_tools_errors_and_public_prs_remain_allowed():
     assert (
         GUARD.findings(
             "reference",
-            "graph_query; NOT_READY; schema_version 1; protocol 2025-11-25; SHA-256; #123",
+            "graph_query; NOT_READY; schema_version 1; protocol 2025-11-25; SHA-256; #123; "
+            "docs/reference/mcp.md; docs/cli-version-and-doctor.md; axiom-specs component",
         )
         == []
     )

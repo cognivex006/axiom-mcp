@@ -1,13 +1,6 @@
 # Bounded query engine
 
-Owner: `axiom-mcp`. Contract: `repo-seeds/axiom-mcp/docs/17-FASTAPI-MCP.md` section 5 (request and
-response shape) and section 6 (structured result and byte budget); canonical schemas live in
-`axiom-specs/contracts/schemas/query-request.schema.json` and `query-response.schema.json`.
-
-The engine answers `graph_query` from the processed JSON snapshot only. It never parses
-application source, never opens a database, never calls the daemon and never reads a file: a
-caller hands in generations that `docs/snapshot-reader-core.md` already copied, verified and
-released, and every operation is bounded before it expands anything.
+Graph queries operate on published snapshots and return bounded, generation-backed results. The query engine does not parse source or run arbitrary SQL, Cypher or shell commands. See [MCP tools](reference/mcp.md) for the public request shapes.
 
 ## Shape of the package
 
