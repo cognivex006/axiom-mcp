@@ -67,6 +67,8 @@ Full Changelog: [v0.1.2…v0.1.3](https://github.com/orchex006/axiom-mcp/compare
 
 ### Bug Fixes
 
+- Expose only the `axmp` console command. Access locked launch-plan diagnostics through `axmp entrypoints`.
+
 - Use the installed platform's native guard and registry resolution rather than a developer-machine path assumption.
 - Keep configured credential-file references usable in a sanitized launch environment without copying token values.
 

@@ -50,7 +50,7 @@ def test_pyproject_pins_every_runtime_dependency_exactly(project: dict) -> None:
 
 
 def test_pyproject_declares_the_console_entry_point(project: dict) -> None:
-    assert project["project"]["scripts"]["axiom-mcp"] == "axiom_mcp.cli:main"
+    assert project["project"]["scripts"] == {"axmp": "axiom_mcp.command:main"}
 
 
 def test_pyproject_configures_the_required_check(project: dict) -> None:

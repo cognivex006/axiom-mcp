@@ -943,7 +943,7 @@ def entrypoint_lock_reasons(
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="axiom-mcp-entrypoints", description=__doc__)
+    parser = argparse.ArgumentParser(prog="axmp entrypoints", description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
 
     def add_plan_options(target: argparse.ArgumentParser) -> None:

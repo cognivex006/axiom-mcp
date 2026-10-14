@@ -37,3 +37,9 @@ def test_http_keeps_transport_arguments_and_exit_code():
     with patch("axiom_mcp.http.main", return_value=5) as run:
         assert main(["http", "--allow-host", "127.0.0.1:8765"]) == 5
         run.assert_called_once_with(["--allow-host", "127.0.0.1:8765"])
+
+
+def test_entrypoints_preserves_locked_launch_options_and_exit_code():
+    with patch("axiom_mcp.entrypoints.main", return_value=6) as run:
+        assert main(["entrypoints", "--help"]) == 6
+        run.assert_called_once_with(["--help"])

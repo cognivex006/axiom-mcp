@@ -53,7 +53,7 @@ missing pinned name is a pin failure, not a warning:
 python -m pytest tests -q
 ```
 
-`axiom_mcp.version.runtime_pin_reasons()` is the shared predicate that `axiom-mcp
+`axiom_mcp.version.runtime_pin_reasons()` is the shared predicate that `axmp
 doctor` reports. Re-pinning requires a new spike, new artifacts and an
 updated `spec.lock.json` review; it is never inferred from a build timestamp.
 

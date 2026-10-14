@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 USAGE = """axmp - Axiom MCP Server / Gateway
 
-USAGE: axmp [stdio|http|version|doctor|update] [options]
+USAGE: axmp [stdio|http|version|doctor|update|entrypoints] [options]
 
 COMMANDS:
   stdio    host-owned MCP child process (default)
@@ -15,6 +15,7 @@ COMMANDS:
   version  component/runtime versions
   doctor   credential and graph-readiness diagnostics
   update   check availability or delegate an approved update plan
+  entrypoints  inspect and manage locked native launch plans
 
 Run axmp <command> --help for command options.
 """
@@ -37,7 +38,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         from axiom_mcp.cli import main as run
 
         return run(arguments)
-    print("axmp: expected stdio, http, version, doctor or update; use axmp --help", file=sys.stderr)
+    if arguments[0] == "entrypoints":
+        from axiom_mcp.entrypoints import main as run
+
+        return run(arguments[1:])
+    print(
+        "axmp: expected stdio, http, version, doctor, update or entrypoints; use axmp --help",
+        file=sys.stderr,
+    )
     return 2
 
 

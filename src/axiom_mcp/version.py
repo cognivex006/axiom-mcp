@@ -25,7 +25,7 @@ VERSION = "0.1.6"
 
 SPEC_VERSION = "2.0.0-draft.1"
 SPEC_REPOSITORY = "axiom-specs"
-SPEC_REVISION = "5f416cd3301441eb4c150af0914e4d5fb6dcd683"
+SPEC_REVISION = "4b90fb0a2586cbcf5b9d2f09f29955f3a58d2db2"
 
 # Integer-major dimensions from contracts/version-dimensions.json (declared_value).
 GRAPH_SCHEMA = 1

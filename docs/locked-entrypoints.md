@@ -46,7 +46,7 @@ reads both definitions and fails when they disagree.
 ```
 
 `src/axiom_mcp/entrypoints.py` is reachable both as `python -m axiom_mcp.entrypoints`
-and through the `axiom-mcp-entrypoints` console script that `pyproject.toml` declares;
+and through the `axmp entrypoints` console script that `pyproject.toml` declares;
 both call the same `main`, and a test reads the declaration so a script whose target
 does not exist cannot be installed.
 

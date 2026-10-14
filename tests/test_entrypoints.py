@@ -1213,8 +1213,7 @@ def test_the_declared_console_script_names_the_module_entrypoint() -> None:
 
     scripts = document["project"]["scripts"]
 
-    assert scripts["axiom-mcp-entrypoints"] == "axiom_mcp.entrypoints:main"
-    assert scripts["axiom-mcp"].split(":")[0].startswith("axiom_mcp.")
+    assert scripts == {"axmp": "axiom_mcp.command:main"}
 
 
 # --- the metadata read and the remaining helpers ----------------------------
