@@ -10,6 +10,8 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ### Documentation
 
+- Clarify installation versus gateway diagnostics, functional SQLite readiness and repair guidance. Document the private `bin/graphd-engine/` layout and the four public commands.
+
 - Reorganize MCP setup around installation, assistant connection, scoped graph queries and troubleshooting. Explain the engine, watcher and MCP responsibilities and distinguish tool discovery from authenticated access.
 - Remove internal tracking labels, private specification paths and obsolete development transcripts from public guides. Add operation-specific query examples and current platform guidance.
 

@@ -112,6 +112,14 @@ repository root is redacted through the same policy `axiom_mcp.errors` enforces.
 Incompatibility is checked before not-ready, so a machine with a wrong SDK
 reports `9` rather than a less specific `4`.
 
+## Installation and graph engine checks
+
+Use `axm doctor` to check the Axiom installation, including the provisioned MCP Python runtime and the SQLite driver linked into the graph engine. SQLite readiness is based on opening a connection and executing SQL; the observed version is informational. No separate system SQLite package or matching SQLite version is required. Database schema compatibility and actual journal-mode checks still apply when opening a project graph.
+
+Use `axmp doctor` for gateway configuration, credentials and query/control readiness. A successful installation check does not imply a configured gateway or an indexed project. If SQLite is unavailable, repair the graph engine with `axm install`; if gateway credentials or endpoints are missing, configure the specific item reported by `axmp doctor`.
+
+The public commands are `axm`, `axsk`, `axge` and `axmp`. The CLI keeps its private installation engine in `<install-root>/bin/graphd-engine/`; AI hosts launch `axmp` and do not point at that private directory. Install and update handle verified older engine layouts. Leave project graph directories and MCP runtime generations in place.
+
 ## Contributor checks
 
 ```
