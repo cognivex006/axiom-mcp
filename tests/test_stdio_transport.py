@@ -81,7 +81,7 @@ def test_banner_and_diagnostics_are_written_to_the_diagnostics_stream() -> None:
     diagnostics.banner(protocol=version.MCP_PROTOCOL_MINIMUM)
 
     text = stderr.getvalue()
-    assert "axiom-mcp stdio transport" in text
+    assert "Axiom MCP (axmp) stdio transport" in text
     assert f"version={version.VERSION}" in text
     assert f"protocol={version.MCP_PROTOCOL_MINIMUM}" in text
     assert "stdout=protocol-only" in text
@@ -177,7 +177,7 @@ def test_full_initialize_handshake_keeps_stdout_protocol_only(restore_streams: N
     assert responses[0]["result"]["protocolVersion"] == version.MCP_PROTOCOL_MINIMUM
 
     text = diagnostics.stream.getvalue()
-    assert "axiom-mcp stdio transport" in text
+    assert "Axiom MCP (axmp) stdio transport" in text
     stop = [line for line in text.splitlines() if "stdio_stop" in line]
     assert len(stop) == 1
     assert "violations=0" in stop[0]
@@ -289,7 +289,7 @@ def test_serve_stdio_without_a_banner_still_reports_shutdown(restore_streams: No
 
     text = diagnostics.stream.getvalue()
     assert exit_code == 0
-    assert "axiom-mcp stdio transport" not in text
+    assert "Axiom MCP (axmp) stdio transport" not in text
     assert "stdio_stop" in text
 
 

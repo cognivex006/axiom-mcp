@@ -40,7 +40,7 @@ from mcp.server.stdio import stdio_server
 from axiom_mcp import version
 
 COMPONENT = "axiom-mcp"
-BANNER_PREFIX = f"{COMPONENT}: "
+BANNER_PREFIX = "axmp: "
 
 __all__ = [
     "BANNER_PREFIX",
@@ -81,8 +81,8 @@ class Diagnostics:
 def banner_lines(*, protocol: str | None = None) -> tuple[str, ...]:
     """Return the startup banner. It is diagnostic text and belongs on stderr."""
     return (
-        "axiom-mcp stdio transport",
-        f"component={COMPONENT} version={version.VERSION}",
+        "Axiom MCP (axmp) stdio transport",
+        f"Axiom MCP version={version.VERSION}",
         f"spec_version={version.SPEC_VERSION} spec_revision={version.SPEC_REVISION}",
         f"sdk={version.SDK_PACKAGE}=={version.SDK_PIN} protocol_min={version.MCP_PROTOCOL_MINIMUM}",
         f"protocol={protocol if protocol is not None else version.MCP_PROTOCOL_MINIMUM}",
