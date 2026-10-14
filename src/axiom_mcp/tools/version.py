@@ -66,7 +66,8 @@ _ARGUMENTS = ("components", "check_update")
 _RELEASES = "https://github.com/orchex006/axiom-cli/releases/latest/download"
 HUMAN_COMMANDS = {
     "short_command": "axm",
-    "long_form": "axiom-cli",
+    "long_form": "axm",
+    "commands": {"cli": "axm", "skills": "axsk", "graph_engine": "axge", "mcp": "axmp"},
     "update": "axm update",
     "doctor": "axm doctor",
     "version": "axm version",
@@ -80,8 +81,8 @@ HUMAN_COMMANDS = {
         "posix": f"curl -fsSL {_RELEASES}/install.sh | sh",
     },
     "note": (
-        "axm is the short name of axiom-cli from 0.1.5; "
-        "on 0.1.4 or older use axiom-cli with the same verbs"
+        "Use axm for orchestration, axsk for skills, axge for the graph engine and axmp for MCP. "
+        "These are public command names; repository and component identifiers are separate."
     ),
 }
 

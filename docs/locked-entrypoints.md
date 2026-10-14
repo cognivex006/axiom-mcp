@@ -180,7 +180,7 @@ resolve is real. Scripted legs say so in their own docstring.
 
 This surface also exposed a live defect in the entrypoint it distributes:
 `axiom_mcp.stdio.main` passed `banner=` to `anyio.run`, which forwards only positional
-arguments to the callable it is given, so `python -m axiom_mcp.stdio` - the documented
+arguments to the callable it is given, so `axmp stdio` - the documented
 way to run the transport on its own, and the exact argv this plan names - died with
 `TypeError: run() got an unexpected keyword argument 'banner'` before serving anything.
 `serve_stdio` itself was correct and directly tested, which is why the defect stayed

@@ -92,7 +92,7 @@ def test_installation_block_claims_no_install_path(tmp_path):
         "applies_via": "cli_or_skill_workflow",
     }
     assert commands["short_command"] == "axm"
-    assert commands["long_form"] == "axiom-cli"
+    assert commands["long_form"] == "axm"
     assert commands["update"] == "axm update"
     assert commands["doctor"] == "axm doctor"
     assert commands["version"] == "axm version"
@@ -106,7 +106,13 @@ def test_installation_commands_are_text_for_humans_only(tmp_path):
     assert one_liner["windows"].endswith('releases/latest/download/update.ps1 | iex"')
     assert one_liner["posix"].endswith("releases/latest/download/update.sh | sh")
     assert commands["install_one_liner"]["posix"].endswith("install.sh | sh")
-    assert "0.1.4" in commands["note"]
+    assert commands["commands"] == {
+        "cli": "axm",
+        "skills": "axsk",
+        "graph_engine": "axge",
+        "mcp": "axmp",
+    }
+    assert "short name of axiom-cli" not in commands["note"]
     # The reported block is a copy: mutating it cannot change what the next call reports.
     commands["update_one_liner"]["windows"] = "changed"
     assert call(context)["installation"]["commands"]["update_one_liner"]["windows"] != "changed"

@@ -360,7 +360,7 @@ def serve(app: FastAPI, settings: HttpTransportSettings | None = None) -> None:
 
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="axiom-mcp-http", description="Run the axiom-mcp Streamable HTTP transport."
+        prog="axmp http", description="Run the axiom-mcp Streamable HTTP transport."
     )
     parser.add_argument("--name", default=version.COMPONENT)
     parser.add_argument("--host", default=DEFAULT_HOST)

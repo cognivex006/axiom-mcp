@@ -531,7 +531,7 @@ def doctor_report(env: DoctorEnvironment) -> dict[str, Any]:
 def format_doctor_text(report: Mapping[str, Any]) -> str:
     """Render the report for a human without losing the machine facts."""
     lines = [
-        f"{report['component']} {report['version']} (build {report['build_revision']})",
+        f"Axiom MCP (axmp) {report['version']} (build {report['build_revision']})",
         f"spec {report['spec_version']} @ {report['spec_revision']}",
         f"verdict: {report['verdict']} (exit {report['exit_code']})",
     ]
@@ -571,8 +571,8 @@ def build_parser() -> argparse.ArgumentParser:
     the contract requires an invalid flag or command to error.
     """
     parser = _Parser(
-        prog=version.COMPONENT,
-        description="axiom-mcp: processed-JSON query gateway over the official MCP SDK.",
+        prog="axmp",
+        description="axmp: processed-JSON query gateway over the official MCP SDK.",
     )
     subcommands = parser.add_subparsers(dest="command", metavar="COMMAND")
 
@@ -696,7 +696,7 @@ def _run_update_apply(*, as_json: bool, plan_path: str, approve_digest: str | No
     try:
         document = json.loads(pathlib.Path(plan_path).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        problem = f"{version.COMPONENT}: cannot read plan {plan_path}: {type(exc).__name__}"
+        problem = f"axmp: cannot read plan {plan_path}: {type(exc).__name__}"
         print(problem, file=sys.stderr)
         return EXIT_VALIDATION
     try:
@@ -712,7 +712,7 @@ def _run_update_apply(*, as_json: bool, plan_path: str, approve_digest: str | No
             ),
         )
     except update.UpdateUnavailable as exc:
-        print(f"{version.COMPONENT}: {exc}", file=sys.stderr)
+        print(f"axmp: {exc}", file=sys.stderr)
         return EXIT_NOT_FOUND
     except update.PlanRejected as exc:
         for reason in exc.reasons:
@@ -738,7 +738,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         args = parser.parse_args(list(sys.argv[1:] if argv is None else argv))
     except UsageError as exc:
-        print(f"{version.COMPONENT}: {exc}", file=sys.stderr)
+        print(f"axmp: {exc}", file=sys.stderr)
         return EXIT_VALIDATION
     except SystemExit as exc:  # --help and --version write and exit zero
         return int(exc.code or 0)
@@ -755,7 +755,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_update_apply(
                 as_json=args.json, plan_path=args.plan, approve_digest=args.approve_digest
             )
-        print("usage: axiom-mcp update {check,apply}", file=sys.stderr)
+        print("usage: axmp update {check,apply}", file=sys.stderr)
         return EXIT_VALIDATION
     parser.print_help(sys.stderr)
     return EXIT_VALIDATION

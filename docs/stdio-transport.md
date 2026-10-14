@@ -7,7 +7,7 @@ Use stdio when your assistant launches MCP as its child process. The gateway reg
 Use the installed environment's Python:
 
 ```sh
-python -m axiom_mcp.stdio --name axiom-mcp
+axmp stdio --name axmp
 ```
 
 The host should provide the executable and argv directly rather than constructing a shell command. Configure the instance home, caller registry and credential reference in its environment as shown in [Installation and upgrade](install-and-upgrade.md#connect-your-assistant).
@@ -26,7 +26,7 @@ Discovery works without credentials, but tool calls then refuse `UNAUTHENTICATED
 
 Stdout contains newline-delimited JSON-RPC frames only. Do not merge stderr into stdout in a host launch configuration. Startup messages, diagnostics and shutdown counters belong on stderr.
 
-The implementation redirects accidental text writes to diagnostics while allowing the MCP SDK's protocol buffer to write frames. The SDK negotiates the protocol revision; the component's supported minimum is reported by `axiom-mcp version`.
+The implementation redirects accidental text writes to diagnostics while allowing the MCP SDK's protocol buffer to write frames. The SDK negotiates the protocol revision; the component's supported minimum is reported by `axmp version`.
 
 ## Troubleshooting
 

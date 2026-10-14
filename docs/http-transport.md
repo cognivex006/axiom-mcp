@@ -5,7 +5,7 @@ Use HTTP for an explicitly configured local gateway. It registers the same six t
 ## Launch
 
 ```sh
-python -m axiom_mcp.http --name axiom-mcp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+axmp http --name axmp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
 ```
 
 Use the installed environment's Python and configure `AXIOM_HOME`, the private caller registry and any required control connection. See [Installation and upgrade](install-and-upgrade.md#connect-your-assistant).

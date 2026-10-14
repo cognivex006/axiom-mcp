@@ -1,5 +1,12 @@
 # Axiom MCP
 
+| Component | CLI Command | คำอ่าน | Responsibility |
+|---|---|---|---|
+| Axiom CLI | `axm` | แอ็กซ์-เอ็ม | Main CLI / Orchestrator |
+| Axiom Skills | `axsk` | แอ็กซ์-สกิล | Skills Manager |
+| Axiom Graph Engine | `axge` | แอ็กซ์-จี | Graph Engine |
+| Axiom MCP | `axmp` | แอ็กซ์-เอ็ม-พี | MCP Server / Gateway |
+
 Give your AI assistant scoped access to an Axiom code graph. The gateway exposes six tools over stdio or Streamable HTTP for bounded queries, graph status and authorized refresh requests.
 
 **[Get started](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md)** · **[Tools](https://github.com/orchex006/axiom-mcp/blob/main/docs/reference/mcp.md)** · **[Documentation](https://github.com/orchex006/axiom-mcp/blob/main/docs/README.md)** · **[Releases](https://github.com/orchex006/axiom-mcp/releases)**
@@ -33,7 +40,7 @@ One Python wheel supports Windows x64, Linux x64 and Intel Mac. Apple silicon ru
 Use the installed environment's Python. Stdio is the usual choice when your assistant launches the gateway as a child process:
 
 ```sh
-python -m axiom_mcp.stdio --name axiom-mcp
+axmp stdio --name axmp
 ```
 
 Configure `AXIOM_HOME`, `AXIOM_MCP_TOKEN_REGISTRY` and `AXIOM_MCP_TOKEN_REFERENCE` in the host's launch environment. Keep the instance home and repository bindings consistent with the engine. Credential configuration contains private file or environment references, not token values. Follow [Connect your assistant](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md#connect-your-assistant) for an example.
@@ -43,7 +50,7 @@ Tool discovery works without credentials; tool calls require registered credenti
 Streamable HTTP requires explicit Host and Origin allowlists:
 
 ```sh
-python -m axiom_mcp.http --name axiom-mcp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+axmp http --name axmp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
 ```
 
 HTTP listens at `/mcp` and authenticates incoming bearer credentials. Use [HTTP transport](https://github.com/orchex006/axiom-mcp/blob/main/docs/http-transport.md) for setup and probes. The CLI owns background service supervision.
@@ -63,7 +70,7 @@ The [tool reference](https://github.com/orchex006/axiom-mcp/blob/main/docs/refer
 
 ## Troubleshooting
 
-Run `axiom-mcp version` and `axiom-mcp doctor` in the installed environment. Doctor checks credentials and query/control readiness separately; a bare installation can correctly exit `4` while configuration is incomplete.
+Run `axmp version` and `axmp doctor` in the installed environment. Doctor checks credentials and query/control readiness separately; a bare installation can correctly exit `4` while configuration is incomplete.
 
 | Symptom | Check |
 |---|---|

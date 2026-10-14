@@ -4,6 +4,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+### New Features
+
+- Add `axmp` as the public MCP command: run stdio by default, select HTTP explicitly, or use version, doctor and update diagnostics. Keep authentication, scopes and protocol streams unchanged.
+
 ### Documentation
 
 - Reorganize MCP setup around installation, assistant connection, scoped graph queries and troubleshooting. Explain the engine, watcher and MCP responsibilities and distinguish tool discovery from authenticated access.

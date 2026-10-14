@@ -379,7 +379,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     exists so the transport can be run and verified on its own
     (``python -m axiom_mcp.stdio``).
     """
-    parser = argparse.ArgumentParser(prog="axiom-mcp-stdio", description=__doc__)
+    parser = argparse.ArgumentParser(prog="axmp stdio", description=__doc__)
     parser.add_argument("--name", default=COMPONENT)
     parser.add_argument("--no-banner", action="store_true")
     args = parser.parse_args(argv)

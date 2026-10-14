@@ -1,6 +1,6 @@
 # Runtime compatibility — axiom-mcp
 
-The gateway uses Python 3.13 and pinned dependencies. Read `axiom-mcp version` for the installed runtime and compatibility dimensions; `pyproject.toml` declares the package requirements.
+The gateway uses Python 3.13 and pinned dependencies. Read `axmp version` for the installed runtime and compatibility dimensions; `pyproject.toml` declares the package requirements.
 
 ## Pinned surface
 
