@@ -4,6 +4,8 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.7
+
 ### New Features
 
 - Add `axmp` as the public MCP command: run stdio by default, select HTTP explicitly, or use version, doctor and update diagnostics. Keep authentication, scopes and protocol streams unchanged.
