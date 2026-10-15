@@ -1,0 +1,1 @@
+Initial global Python test invocation reported 805 passed, 5 skipped and 12 setup errors: ambient pydantic 2.12.5 disagreed with the required 2.13.4 pin. Ruff and public docs passed. Rerun uses an isolated Python 3.13 environment installed from the hash-pinned Windows runtime requirements. No global packages changed.

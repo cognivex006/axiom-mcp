@@ -4,6 +4,13 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.8
+
+### Chores
+
+- Package the existing portable MCP protocol and query surface for the 0.1.8 distribution; runtime behavior and tool schemas remain unchanged.
+
+
 ## 0.1.7
 
 ### New Features

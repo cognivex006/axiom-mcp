@@ -1,0 +1,48 @@
+[
+  {
+    "id": "pytest",
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q"
+    ],
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "exit_code": 0
+  },
+  {
+    "id": "ruff",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "exit_code": 0
+  },
+  {
+    "id": "format",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "exit_code": 0
+  },
+  {
+    "id": "docs",
+    "command": [
+      "python",
+      "tools/check_public_docs.py"
+    ],
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "exit_code": 0
+  }
+]
