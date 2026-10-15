@@ -1,0 +1,24 @@
+{
+  "task_id": "W-007",
+  "source_repo": "axiom-mcp",
+  "branch": "feature/w-007-release-018",
+  "source_revision": "adf828ed83436eea86f90a4526e1786f76d9de2a",
+  "local_commit_sha": "adf828ed83436eea86f90a4526e1786f76d9de2a",
+  "verified_remote_branch_sha": "adf828ed83436eea86f90a4526e1786f76d9de2a",
+  "push_remote": "https://github.com/orchex006/axiom-mcp.git",
+  "release_source_revision": "a884bee8547fe6c5b1fc4ea6e42e145a9a95ab90",
+  "component_version": "0.1.8",
+  "delivery_state": "integrated",
+  "main_integration": "verified release source integrated",
+  "primary_checkout": ".",
+  "release": "published",
+  "release_url": "https://github.com/orchex006/axiom-mcp/releases/tag/v0.1.8",
+  "all_downloaded_checksums_verified": true,
+  "source_ci": {
+    "conclusion": "success",
+    "headSha": "adf828ed83436eea86f90a4526e1786f76d9de2a",
+    "status": "completed",
+    "url": "https://github.com/orchex006/axiom-mcp/actions/runs/38672680387"
+  },
+  "note": "This is an evidence-only follow-up. Immutable release tags/assets are unchanged; the canonical publication receipt records the final delivery commit."
+}
