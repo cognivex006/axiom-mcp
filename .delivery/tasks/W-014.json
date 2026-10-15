@@ -1,0 +1,24 @@
+{
+  "task_id": "W-014",
+  "source_repo": "axiom-mcp",
+  "branch": "feature/w-014-release-019",
+  "source_revision": "95aa70104b9d89da4a843a4badff0940f864fbec",
+  "local_commit_sha": "95aa70104b9d89da4a843a4badff0940f864fbec",
+  "verified_remote_branch_sha": "95aa70104b9d89da4a843a4badff0940f864fbec",
+  "push_remote": "https://github.com/orchex006/axiom-mcp.git",
+  "release_source_revision": "95aa70104b9d89da4a843a4badff0940f864fbec",
+  "component_version": "0.1.9",
+  "delivery_state": "integrated",
+  "main_integration": "Verified source integrated before immutable release tag",
+  "primary_checkout": ".",
+  "release": "published",
+  "release_url": "https://github.com/orchex006/axiom-mcp/releases/tag/v0.1.9",
+  "all_downloaded_checksums_verified": true,
+  "tag_ci": {
+    "conclusion": "success",
+    "headSha": "95aa70104b9d89da4a843a4badff0940f864fbec",
+    "status": "completed",
+    "url": "https://github.com/orchex006/axiom-mcp/actions/runs/38686951983"
+  },
+  "note": "This record identifies the verified immutable release source. Receipt-only follow-up commits do not change product bytes; final metadata branch/main revisions are recorded separately in canonical publication evidence."
+}
