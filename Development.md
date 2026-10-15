@@ -138,3 +138,7 @@ python tools/check_public_docs.py
 ```
 
 The same check runs before wheel packaging and release publication. It verifies source/packaged README parity and scans wheel documentation without modifying immutable protocol assets.
+
+## Authorized 0.1.9 patch release
+
+The user request on 2026-10-15 authorizes the 0.1.9 patch set. This release changes version and packaging metadata only; CLI owns the legacy-store adoption fix. Existing immutable pins, required owner/native checks and review/publication gates remain in force.

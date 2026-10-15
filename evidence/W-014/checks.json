@@ -1,0 +1,52 @@
+[
+  {
+    "id": "pytest",
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q"
+    ],
+    "exit_code": 0,
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "redaction": "Machine-local path prefixes replaced"
+  },
+  {
+    "id": "ruff",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0,
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "redaction": "Machine-local path prefixes replaced"
+  },
+  {
+    "id": "format",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "exit_code": 0,
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "redaction": "Machine-local path prefixes replaced"
+  },
+  {
+    "id": "docs",
+    "command": [
+      "python",
+      "tools/check_public_docs.py"
+    ],
+    "exit_code": 0,
+    "environment": "isolated hash-pinned Python 3.13 runtime",
+    "redaction": "Machine-local path prefixes replaced"
+  }
+]

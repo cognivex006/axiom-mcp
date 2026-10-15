@@ -4,6 +4,12 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.9
+
+### Chores
+
+- Package the unchanged component behavior for the 0.1.9 distribution that fixes legacy CLI-store adoption. Existing protocol, graph and host capability limits remain unchanged.
+
 ## 0.1.8
 
 ### Chores
