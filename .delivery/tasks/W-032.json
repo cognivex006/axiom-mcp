@@ -1,0 +1,15 @@
+{
+  "task_id": "W-032",
+  "source_repo": "axiom-mcp",
+  "branch": "feature/w-032-mcp-startup",
+  "source_revision": "1b609f33e7f73fe2ba9c01d37420d6393abe966c",
+  "local_commit_sha": "1b609f33e7f73fe2ba9c01d37420d6393abe966c",
+  "push_remote": "https://github.com/orchex006/axiom-mcp.git",
+  "verified_source_remote_branch_sha": "1b609f33e7f73fe2ba9c01d37420d6393abe966c",
+  "delivery_state": "pushed",
+  "observed_at": "2026-10-16T10:41:12.761025+00:00",
+  "release": "0.1.11 authorized; required native/tag/artifact gates remain",
+  "main_integration": "not_performed",
+  "verification": "Required final local checks passed; exact selected-head native CI is recorded by canonical handoff.",
+  "note": "Historical source-push observation. This receipt-only descendant changes no product bytes."
+}
