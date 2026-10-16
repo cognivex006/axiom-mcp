@@ -1,0 +1,88 @@
+{
+  "repository": "axiom-mcp",
+  "version": "0.1.10",
+  "release_id": 414667971,
+  "release_url": "https://github.com/orchex006/axiom-mcp/releases/tag/v0.1.10",
+  "source_revision": "8b37a74b387b081df742152e54960b425d1088bf",
+  "tag_verified": true,
+  "latest_verified": true,
+  "all_listed_sha256_verified": true,
+  "assets": {
+    "RELEASE-NOTES.md": {
+      "sha256": "a39f0923d54ae134d5a379db2d7910aaae7a9f18e25c2c2ddb5d3446f3a8db77",
+      "bytes": 1080
+    },
+    "SOURCE-REVISION.txt": {
+      "sha256": "c14614e4ce76f0cd17247f56acc3fdc68616736cfe7f6695b393b9cd6a181ac0",
+      "bytes": 41
+    },
+    "axiom-mcp-0.1.10-linux-x64-wheelhouse.tar.gz": {
+      "sha256": "d477d6bfdc2ef39ab050b5b50f947973eddce0508b56cdd6b9b3cdc89ed08bcf",
+      "bytes": 9419939
+    },
+    "axiom-mcp-0.1.10-macos-x64-wheelhouse.tar.gz": {
+      "sha256": "679bb0d9fe7b9f8dc2ee92573bf3cf26c27683f0ed2f5bb090b1c4b8898ef18c",
+      "bytes": 12633268
+    },
+    "axiom-mcp-0.1.10-windows-x64-wheelhouse.tar.gz": {
+      "sha256": "9f815d8f27e338d27f4f5b991637ad765380ffac0bde4713c7d5c877e54efb0f",
+      "bytes": 15180710
+    },
+    "axiom_mcp-0.1.10-py3-none-any.whl": {
+      "sha256": "065b8f7f59b9e4b92a1cbfe39e808448c5aeb8cbcbf14f7687df2ac61c6e6e35",
+      "bytes": 235360
+    },
+    "linux-x64-native-report.json": {
+      "sha256": "1fe16394af3f5d58230fc8bc8ce348771832d3c218fa6d92fca65f2cd156924f",
+      "bytes": 4500
+    },
+    "linux-x64-py313-inputs.tar": {
+      "sha256": "0f71f441e5926c7c3b8c3a1868db90a49209fa6e2ec13f732ed97eb87eceb436",
+      "bytes": 10106880
+    },
+    "linux-x64-py313-requirements.txt": {
+      "sha256": "ce2e686592de779dd980a20474ed8a317cb05487b8e4388cebfea9a73e000cb6",
+      "bytes": 37634
+    },
+    "linux-x64-runtime-inputs.json": {
+      "sha256": "58f3366b2ac678427413d232076ee9ce82e9e6b6bf45783ca5828ec038a3ab5c",
+      "bytes": 673
+    },
+    "macos-x64-native-report.json": {
+      "sha256": "0bd9bb4245d8c0dbc4bb41e66d4a5e4394ac923acecb780883d3febb7c2bffc9",
+      "bytes": 4500
+    },
+    "macos-x64-py313-inputs.tar": {
+      "sha256": "b4b2d8247d285084a91e3787fad3cd44902b914b39e2d23e4bfb09d91e0430c7",
+      "bytes": 13322240
+    },
+    "macos-x64-py313-requirements.txt": {
+      "sha256": "4db70be8d9acb83b9309d64a21e3fd316e0b19450685d1ba1e538ae6153ea43a",
+      "bytes": 39388
+    },
+    "macos-x64-runtime-inputs.json": {
+      "sha256": "9b2171befc8457acedfd5c4e3a21b95152a2e49cb06de933ec237eb79ec89a18",
+      "bytes": 673
+    },
+    "wheel-provenance.json": {
+      "sha256": "8142aa81a27476321e003dfb2a880547c71bc0b73b79f64051af8d019c58479a",
+      "bytes": 262
+    },
+    "windows-x64-native-report.json": {
+      "sha256": "1c704bd5461d0e359c03bdb4c1c64e1e5cef4fb141dffc1d6077850ebd017faf",
+      "bytes": 4501
+    },
+    "windows-x64-py313-inputs.tar": {
+      "sha256": "d80067537d09686c56eebcb7fb537cdaf794bb1b5aa4cebd9d37cd7250957b11",
+      "bytes": 15861760
+    },
+    "windows-x64-py313-requirements.txt": {
+      "sha256": "a24ce21137e780baca68a3a0e1695efe11959634a6a5cdc61a3792c48afa61a6",
+      "bytes": 3298
+    },
+    "windows-x64-runtime-inputs.json": {
+      "sha256": "a0c184804580bd35dc76ab1529898f23b246cc6f62c9da06402f24a460ded8d2",
+      "bytes": 681
+    }
+  }
+}
