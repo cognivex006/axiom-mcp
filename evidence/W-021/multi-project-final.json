@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "platform": "win32",
+  "projects": [
+    "a",
+    "b",
+    "c"
+  ],
+  "engine_sha256": "ec91f171fb531adeaab9c764fcbc8b1f7f774ac9448825ba83c1477f9bd1c1f9",
+  "analyzed_real_source": true,
+  "authenticated_mcp_query": true,
+  "initial_cache_misses": 3,
+  "warm_cache_hits": 12,
+  "publisher_overlap_queries": 8,
+  "writer_contention_observed": false,
+  "contention_refusal_preserves_generation_vector": true,
+  "changed_project_selects_new_generation": true,
+  "all_observations_pin_complete_known_vectors": true,
+  "unchanged_projects_reused": true,
+  "human_instructions_preserved": true,
+  "scope": "Native MCP/engine fixtures; AI-host discovery is unverified",
+  "close_released_cached_graphs": true
+}

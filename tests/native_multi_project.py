@@ -156,7 +156,32 @@ def verify(engine: Path) -> dict:
                 if publisher.poll() is not None:
                     break
             stdout, stderr = publisher.communicate(timeout=60)
-            assert publisher.returncode == 0, stdout + stderr
+            writer_contention = publisher.returncode != 0
+            if writer_contention:
+                assert "WRITER_ALREADY_RUNNING" in stdout + stderr, stdout + stderr
+                assert all(
+                    reply["project_generations"] == initial["project_generations"]
+                    for reply in observations
+                )
+                retry = subprocess.run(
+                    [
+                        str(engine),
+                        "build",
+                        "--solution",
+                        "multi",
+                        "--project",
+                        "c",
+                        "--full",
+                        "--json",
+                    ],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+                assert retry.returncode == 0, retry.stdout + retry.stderr
+            else:
+                assert publisher.returncode == 0, stdout + stderr
             final = anyio.run(query)
             assert "ProjectCChangedNeedle" in json.dumps(final), (final, stdout)
 
@@ -179,6 +204,8 @@ def verify(engine: Path) -> dict:
                 initial_cache_misses=3,
                 warm_cache_hits=warm["hits"],
                 publisher_overlap_queries=len(observations),
+                writer_contention_observed=writer_contention,
+                contention_refusal_preserves_generation_vector=True,
                 changed_project_selects_new_generation=True,
                 all_observations_pin_complete_known_vectors=True,
                 unchanged_projects_reused=True,

@@ -63,5 +63,19 @@
     "exit_code": 0,
     "artifact": "evidence/W-021/owner-tests.txt",
     "sha256": "c2e6fcd23b37cfd21e4e627079ad0deab79e13c6040805251b9ddc7001bfca3c"
+  },
+  {
+    "id": "final-native-multi-project",
+    "command": [
+      "python",
+      "tests/native_multi_project.py",
+      "--engine",
+      "<verified-native-engine>",
+      "--out",
+      "<fixture-report>"
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-021/multi-project-final.json",
+    "sha256": "5197929a3a97a3f7c14eb595da7413df6201cb0ce1fcf3ce8e4a36430c0b187e"
   }
 ]
