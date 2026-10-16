@@ -4,9 +4,15 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.10
+
 ### New Features
 
 - Add named local gateways with native process ownership, configurable three-hour idle exit and bounded multi-project parsed-generation retention. Preserve per-query authorization and graph provenance.
+
+### Known Limitations
+
+- The gateway uses authenticated MCP Streamable HTTP. Cross-solution workflows report separate generation vectors; no atomic cross-solution snapshot is claimed. Restart the owned gateway after credential/control changes. Mac ARM and separate WSL2 were not run.
 
 ## 0.1.9
 

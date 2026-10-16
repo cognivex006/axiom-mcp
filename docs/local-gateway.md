@@ -1,7 +1,7 @@
 # Local graph gateway
 
-`axmp serve` and the supervisor commands below are unpublished development
-additions. Published 0.1.9 supports the existing `axmp http` and `axmp stdio` forms.
+`axmp serve` and the supervisor commands below require Axiom 0.1.10 or later.
+Published 0.1.9 supports the existing `axmp http` and `axmp stdio` forms.
 
 ## Start and stop
 

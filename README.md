@@ -30,7 +30,7 @@ Development builds provide a named local HTTP gateway:
 axmp serve --instance workspace --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
 ```
 
-The serve/supervisor additions are unpublished. Published 0.1.9 can run the existing
+Version 0.1.10 adds serve and background supervision. Published 0.1.9 can run the existing
 HTTP API with the same host/port/allowlist options using `axmp http`.
 The authenticated MCP endpoint is `/mcp`; `/healthz` reports process health and
 `/readyz` reports query/control readiness separately.

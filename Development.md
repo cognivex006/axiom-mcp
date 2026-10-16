@@ -146,3 +146,7 @@ The user request on 2026-10-15 authorizes the 0.1.9 patch set. This release chan
 ## Agent onboarding and local gateway development
 
 The 2026-10-16 owner request authorizes the approved agent onboarding implementation on scoped feature branches. Canonical terminal names are axm/axge/axmp; axsk is the agent skill. Host lifecycle is managed once by axm. Gateway changes retain authenticated multi-project scope and verified generations, isolated process ownership, bounded retention and configurable three-hour idle shutdown. Version remains unchanged and this feature work is unpublished; independent detailed shared-contract/security review remains required before integration/publication.
+
+## Authorized 0.1.10 release
+
+The user explicitly requested merge and release as 0.1.10 on 2026-10-16. This release prepares the previously verified onboarding/gateway source and release documentation. This supersedes the earlier feature-only restriction. Main integration, new release/v0.1.10 branch, immutable v0.1.10 tag and publication are authorized after independent shared-contract review and required owner/native checks. Older tags/assets and real installed user state remain preserved.
