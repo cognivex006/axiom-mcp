@@ -4,6 +4,17 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.11
+
+### Bug Fixes
+
+- Resolve the MCP SDK's incomplete lifespan settings before server construction, removing the startup warning while retaining settings validation.
+
+### New Features
+
+- Explain stdio client waiting and foreground HTTP operation at startup, with process health, readiness and instance status guidance while keeping protocol and JSON output separate.
+- List owned gateway instances and make bare stop select the unique running instance or refuse with explicit selection guidance when multiple or uncertain owners exist.
+
 ## 0.1.10
 
 ### New Features

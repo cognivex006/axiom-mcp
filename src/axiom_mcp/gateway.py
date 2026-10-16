@@ -59,15 +59,16 @@ def failure(args: argparse.Namespace, code: int, message: str) -> int:
     return code
 
 
-def directory(name: str) -> Path:
+def directory(name: str, *, create: bool = True) -> Path:
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", name):
         raise ValueError("instance must be a portable lowercase name")
     home = axiom_home()
     path = home / "gateways" / name
     for ancestor in (home, home / "gateways", path):
-        if ancestor.is_symlink():
+        if ancestor.is_symlink() or ancestor.is_junction():
             raise ValueError("gateway ownership paths cannot be links")
-    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if create:
+        path.mkdir(parents=True, exist_ok=True, mode=0o700)
     return path
 
 
@@ -89,7 +90,7 @@ def write_record(path: Path, value: dict) -> None:
     if path.exists():
         previous = read_record(path)
         if path.name == "state.json" and previous.get("document_kind") != "axiom-local-gateway":
-            raise GatewayConflict("unowned instance metadata was preserved")
+            raise GatewayConflict("unowned instance metadata was preserved") from None
         if path.name == "stop.json" and (
             set(previous) != {"nonce"}
             or not isinstance(previous.get("nonce"), str)
@@ -246,15 +247,89 @@ def signature(args: argparse.Namespace) -> str:
 
 
 def inspect(name: str) -> dict:
-    root = directory(name)
+    root = directory(name, create=False)
+    if not (root / "gateway.lock").exists():
+        return {"running": False, "instance": name}
     try:
         lock = Ownership(root / "gateway.lock")
     except GuardBusy:
         record = read_record(root / "state.json")
+        if record and record.get("document_kind") != "axiom-local-gateway":
+            raise GatewayConflict("unowned instance metadata was preserved") from None
         return {**record, "running": True, "instance": name}
     else:
         lock.close()
         return {"running": False, "instance": name}
+
+
+def instances() -> list[dict]:
+    """Observe retained owners in this home without creating instance directories."""
+    base = directory("default", create=False).parent
+    if not base.exists():
+        return []
+    rows = []
+    for candidate in sorted(base.iterdir()):
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", candidate.name):
+            continue
+        if candidate.is_symlink() or candidate.is_junction() or not candidate.is_dir():
+            continue
+        if not (candidate / "state.json").exists() and not (candidate / "gateway.lock").exists():
+            continue
+        try:
+            record = read_record(candidate / "state.json")
+            if record and record.get("document_kind") != "axiom-local-gateway":
+                continue
+            observed = inspect(candidate.name)
+            rows.append({**record, **observed})
+        except (OSError, ValueError, GuardError):
+            rows.append(
+                dict(instance=candidate.name, running=None, error="ownership_metadata_unavailable")
+            )
+    return rows
+
+
+def public_instance(record: dict) -> dict:
+    """Never print ownership nonces, signatures or arbitrary metadata fields."""
+    result = {"instance": record["instance"], "running": record["running"]}
+    for key in ("pid", "port", "idle_timeout_minutes"):
+        value = record.get(key)
+        if (type(value) is int and abs(value) < 2**63) or (
+            type(value) is float and math.isfinite(value)
+        ):
+            result[key] = value
+    for key in ("host", "version", "error"):
+        value = record.get(key)
+        if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9._:+-]{1,253}", value):
+            result[key] = value
+    result["listening"] = record["running"] is True and record.get("listening") is True
+    return result
+
+
+def emit_inventory(records: list[dict], *, json_output: bool) -> None:
+    rows = [public_instance(record) for record in records]
+    if json_output:
+        print(
+            json.dumps(
+                dict(
+                    instances=rows,
+                    running_count=sum(r["running"] is True for r in rows),
+                    unknown_count=sum(r["running"] is None for r in rows),
+                )
+            )
+        )
+        return
+    if not rows:
+        print("No known MCP gateway instances in this AXIOM_HOME.")
+        return
+    print("INSTANCE  STATE  PID  HOST:PORT  VERSION  IDLE-MINUTES")
+    for row in rows:
+        state = {True: "running", False: "stopped", None: "unknown"}[row["running"]]
+        print(
+            f"{row['instance']}  {state}  {row.get('pid', '-')}  "
+            f"{row.get('host', '-')}:{row.get('port', '-')}  "
+            f"{row.get('version', '-')}  {row.get('idle_timeout_minutes', '-')}"
+        )
+    print("Stop one: axm mcp stop --instance NAME")
 
 
 async def run_server(args: argparse.Namespace, root: Path) -> None:
@@ -323,8 +398,18 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
                     args.notice_emitted = True
                 else:
                     print(
-                        f"axmp: {notice['url']} (instance {args.instance}, "
-                        f"idle {args.idle_timeout_minutes:g} minutes)",
+                        f"axmp: HTTP server listening: {notice['url']}\n"
+                        f"axmp: instance={args.instance}; pid={os.getpid()}; "
+                        f"idle timeout={args.idle_timeout_minutes:g} minutes\n"
+                        "axmp: Foreground mode; this terminal stays open "
+                        "while MCP clients connect.\n"
+                        f"axmp: Process health: {notice['url'].removesuffix('/mcp')}/healthz\n"
+                        f"axmp: Query/control readiness: "
+                        f"{notice['url'].removesuffix('/mcp')}/readyz\n"
+                        f"axmp: Status (another terminal): axmp status --instance {args.instance}\n"
+                        "axmp: Listening does not verify client credentials or graph access; "
+                        "run axmp doctor and an authenticated graph query.\n"
+                        "axmp: Waiting for clients. Stop this foreground server with Ctrl+C.",
                         file=sys.stderr,
                         flush=True,
                     )
@@ -372,8 +457,8 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
 
 def parser() -> GatewayParser:
     p = GatewayParser(prog="axmp", description=__doc__)
-    p.add_argument("action", choices=["serve", "start", "status", "stop"])
-    p.add_argument("--instance", default="default")
+    p.add_argument("action", choices=["serve", "start", "list", "status", "stop"])
+    p.add_argument("--instance", help="exact instance; start/serve default to default")
     p.add_argument("--name", default="axmp")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8765)
@@ -395,23 +480,70 @@ def main(argv: list[str] | None = None) -> int:
     options.json_requested = "--json" in words
     args = options.parse_args(words)
     try:
-        root = directory(args.instance)
+        if args.action == "list" or (args.action == "status" and args.instance is None):
+            if args.action == "list" and args.instance is not None:
+                raise ValueError("list takes no --instance; use status --instance NAME")
+            emit_inventory(instances(), json_output=args.json)
+            return 0
+        selected = None
+        if args.action == "stop" and args.instance is None:
+            observed = instances()
+            running = [row for row in observed if row["running"] is True]
+            uncertain = [row for row in observed if row["running"] is None]
+            if len(running) > 1 or uncertain:
+                names = ", ".join(row["instance"] for row in [*running, *uncertain])
+                raise GatewayConflict(
+                    f"Instance selection required ({names}); nothing was stopped. "
+                    "Run axm mcp list, then axm mcp stop --instance NAME"
+                )
+            if not running:
+                message = "No running MCP gateway in this AXIOM_HOME; use axm mcp list to inspect."
+                if args.json:
+                    print(json.dumps(dict(running=False, instance=None, message=message)))
+                else:
+                    print(message)
+                return 0
+            selected = running[0]
+            args.instance = selected["instance"]
+        if args.instance is None:
+            args.instance = "default"
         if args.action in {"status", "stop"}:
             result = inspect(args.instance)
-            if args.action == "stop" and result["running"]:
+            if selected is not None and any(
+                selected.get(key) != result.get(key) for key in ("nonce", "pid", "launch_id")
+            ):
+                raise GatewayConflict(
+                    "Instance owner changed while selecting; retry explicit status"
+                )
+            was_running = result["running"]
+            if args.action == "stop" and was_running:
                 if not result.get("nonce"):
                     raise GatewayOperationError("gateway is starting; retry status before stopping")
+                root = directory(args.instance, create=False)
                 write_record(root / "stop.json", {"nonce": result["nonce"]})
                 for _ in range(140):
-                    if not inspect(args.instance)["running"]:
+                    current = inspect(args.instance)
+                    if not current["running"] or current.get("nonce") != result["nonce"]:
                         break
                     time.sleep(0.25)
                 else:
                     raise TimeoutError("gateway is draining; no foreign process was killed")
                 result = inspect(args.instance)
+                if result["running"]:
+                    raise GatewayConflict(
+                        "The original owner exited but a replacement is running; "
+                        "the replacement was not stopped. Inspect the instance before retrying"
+                    )
             result.pop("nonce", None)
             print(json.dumps(result))
+            if args.action == "stop" and not args.json:
+                print(
+                    f"axmp: {'Stop completed for' if was_running else 'No running gateway named'} "
+                    f"{args.instance}; use axm mcp list to inspect remaining instances.",
+                    file=sys.stderr,
+                )
             return 0
+        root = directory(args.instance)
         if (
             not math.isfinite(args.idle_timeout_minutes)
             or args.idle_timeout_minutes < 0

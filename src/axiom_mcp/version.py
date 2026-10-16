@@ -21,11 +21,11 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
 COMPONENT = "axiom-mcp"
-VERSION = "0.1.10"
+VERSION = "0.1.11"
 
 SPEC_VERSION = "2.0.0-draft.1"
 SPEC_REPOSITORY = "axiom-specs"
-SPEC_REVISION = "73aec1d1ed190bcd7066574853340fe15102ebbe"
+SPEC_REVISION = "336756510dd7ca03fc6d6dbb49c3d36e9253a48e"
 
 # Integer-major dimensions from contracts/version-dimensions.json (declared_value).
 GRAPH_SCHEMA = 1

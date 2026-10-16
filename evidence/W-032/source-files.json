@@ -1,0 +1,16 @@
+{
+  "tests/test_startup_diagnostics.py": "e4360f3323fa1c2e40a72a194e6ad463bf7b1c0a3d0a89409e22e23a02f22501",
+  "Changelog.md": "ca178a760e8eb4b21956a5bdf8247bcf01fa74bb9d0c8dc161d2209496f083f1",
+  "Development.md": "91e089b957be39ed84bf517f2eb510083ab258affa8c4b4e54b22fa5d7043a38",
+  "README.md": "5955ca06a819202da6f46f698848493bd33df97629e3053104c8a0f09fa7c174",
+  "docs/local-gateway.md": "f4f01b3afc06262c2b004fd6f735f977fcc005c2408d14720842d76ddfc2f266",
+  "pyproject.toml": "6f1e96b047be4517ab01b071253d57f96d6e38f9c0443e7d022e6bb7eb1a869f",
+  "spec.lock.json": "cdb25da27c1c25da7f2115d82a0e7c2163a22e7fe926aafbdd88652017ad29f7",
+  "src/axiom_mcp/README.md": "5955ca06a819202da6f46f698848493bd33df97629e3053104c8a0f09fa7c174",
+  "src/axiom_mcp/command.py": "01db9625d3dc58ae329fe32f7c8cfa9f69f78cb83bafc157e65ad000cf00af9a",
+  "src/axiom_mcp/gateway.py": "9e38fef67fc7eb8a5d9726d9c7ed746ab18528c132e40efc743f457d360e9d0f",
+  "src/axiom_mcp/sdk_compat.py": "c337ba7354bbbd655a9d2ca4f341584abe66352af1f5dd94714bb4bde898f963",
+  "src/axiom_mcp/stdio.py": "b69fc6b11cc315fc460075512b48f379f8f0498508b0cf8cd15054e250439dc1",
+  "src/axiom_mcp/version.py": "a900cec014cc263e24fc98332f5754301b444e17655114b6d653b1b0dc24bfd8",
+  "tests/test_gateway_lifecycle.py": "3d554309112d5770d6904495135279dcad4dcc96e2255c289d5970832e12f849"
+}

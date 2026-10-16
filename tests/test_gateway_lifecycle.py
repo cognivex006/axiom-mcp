@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 import httpx
+import pytest
 
 from axiom_mcp.gateway import DEFAULT_IDLE_MINUTES, Activity, ActivityMiddleware
 
@@ -88,6 +89,153 @@ def cleanup(proc):
     except subprocess.TimeoutExpired:
         proc.kill()
         proc.wait()
+
+
+@pytest.mark.parametrize("json_mode", [False, True])
+def test_listening_notice_is_actionable_without_claiming_query_readiness(tmp_path, json_mode):
+    args = words("diagnostics", *(["--json"] if json_mode else []))
+    proc = subprocess.Popen(
+        args, env=environment(tmp_path), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    LAUNCHES[proc.pid] = args[-1]
+    OWNED[proc.pid] = (tmp_path, "diagnostics")
+    try:
+        record = wait_record(tmp_path, "diagnostics", proc)
+        base = f"http://127.0.0.1:{record['port']}"
+        assert httpx.get(f"{base}/healthz").json() == {"status": "ok"}
+        assert httpx.get(f"{base}/readyz").status_code == 503
+        status = subprocess.run(
+            [sys.executable, "-m", "axiom_mcp.gateway", "status", "--instance", "diagnostics"],
+            env=environment(tmp_path),
+            capture_output=True,
+            timeout=15,
+        )
+        assert status.returncode == 0
+        assert json.loads(status.stdout)["running"] is True
+    finally:
+        cleanup(proc)
+    stdout, stderr = proc.communicate(timeout=5)
+    assert b"IncompleteFieldDefinitionWarning" not in stderr
+    if json_mode:
+        assert len(stdout.splitlines()) == 1
+        notice = json.loads(stdout)
+        assert notice["status"] == "listening" and notice["url"] == f"{base}/mcp"
+        assert "readiness are separate" in notice["scope"]
+        assert b"Waiting for clients" not in stderr
+    else:
+        assert stdout == b""
+        for message in [
+            "HTTP server listening:",
+            f"{base}/healthz",
+            f"{base}/readyz",
+            "axmp status --instance diagnostics",
+            "axmp doctor",
+            "Listening does not verify client credentials or graph access",
+            "Waiting for clients",
+            "Ctrl+C",
+        ]:
+            assert message.encode() in stderr
+
+
+def test_inventory_and_bare_stop_select_only_a_unique_running_owner(tmp_path):
+    env = environment(tmp_path)
+
+    def call(action, *extra, code=0):
+        result = subprocess.run(
+            [sys.executable, "-m", "axiom_mcp.command", action, *extra, "--json"],
+            env=env,
+            capture_output=True,
+            timeout=40,
+        )
+        assert result.returncode == code, result.stdout + result.stderr
+        assert len(result.stdout.splitlines()) == 1
+        assert result.stderr == b""
+        return json.loads(result.stdout)
+
+    assert call("list")["instances"] == []
+    assert call("status")["instances"] == []
+    assert call("stop")["instance"] is None
+    assert not (tmp_path / "gateways").exists()
+    first = launch(tmp_path, "workspace")
+    second = None
+    try:
+        record = wait_record(tmp_path, "workspace", first)
+        state_path = tmp_path / "gateways/workspace/state.json"
+        for _ in range(100):
+            record = json.loads(state_path.read_text())
+            if record.get("listening"):
+                break
+            time.sleep(0.05)
+        assert record.get("listening")
+        record["private-extra"] = "must-never-appear-in-inventory"
+        state_path.write_text(json.dumps(record))
+        before = state_path.read_bytes()
+        inventory = call("list")
+        assert inventory["running_count"] == 1
+        row = inventory["instances"][0]
+        assert row["instance"] == "workspace" and row["pid"] == record["pid"]
+        assert row["port"] == record["port"] and row["running"] is True
+        assert record["nonce"] not in json.dumps(inventory)
+        assert "must-never-appear" not in json.dumps(inventory)
+        assert state_path.read_bytes() == before
+        stopped = call("stop")
+        assert stopped["instance"] == "workspace" and stopped["running"] is False
+        assert first.wait(timeout=8) == 0
+        assert call("list")["running_count"] == 0
+        first = launch(tmp_path, "workspace")
+        wait_record(tmp_path, "workspace", first)
+        second = launch(tmp_path, "other")
+        wait_record(tmp_path, "other", second)
+        snapshots = {p: p.read_bytes() for p in (tmp_path / "gateways").glob("*/stop.json")}
+        refusal = call("stop", code=6)
+        assert "workspace" in refusal["message"] and "other" in refusal["message"]
+        assert "--instance" in refusal["message"]
+        assert first.poll() is None and second.poll() is None
+        assert {p: p.read_bytes() for p in snapshots} == snapshots
+        assert not (tmp_path / "gateways/other/stop.json").exists()
+        inactive = subprocess.run(
+            [sys.executable, "-m", "axiom_mcp.command", "stop", "--instance", "default"],
+            env=env,
+            capture_output=True,
+            timeout=15,
+        )
+        assert inactive.returncode == 0 and b"No running gateway named default" in inactive.stderr
+        assert b"axm mcp list" in inactive.stderr
+        assert not (tmp_path / "gateways/default").exists()
+        assert first.poll() is None and second.poll() is None
+        assert call("stop", "--instance", "workspace")["running"] is False
+        assert first.wait(timeout=8) == 0 and second.poll() is None
+        assert call("stop")["instance"] == "other"
+        assert second.wait(timeout=8) == 0
+    finally:
+        cleanup(first)
+        if second is not None:
+            cleanup(second)
+
+
+def test_inventory_ignores_foreign_records_and_refuses_uncertain_selection(tmp_path):
+    env = environment(tmp_path)
+    foreign = tmp_path / "gateways/foreign"
+    foreign.mkdir(parents=True)
+    (foreign / "state.json").write_text('{"document_kind":"someone-else"}')
+    broken = tmp_path / "gateways/broken"
+    broken.mkdir()
+    (broken / "state.json").write_text("broken private record; do not echo")
+    before = {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+    for command, code in [("list", 0), ("stop", 6)]:
+        result = subprocess.run(
+            [sys.executable, "-m", "axiom_mcp.command", command, "--json"],
+            env=env,
+            capture_output=True,
+            timeout=15,
+        )
+        assert result.returncode == code and result.stderr == b""
+        doc = json.loads(result.stdout)
+        if command == "list":
+            assert doc["unknown_count"] == 1
+            assert [r["instance"] for r in doc["instances"]] == ["broken"]
+        assert b"private record" not in result.stdout
+    assert {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()} == before
 
 
 def test_named_instances_duplicate_refusal_crash_release_and_owned_stop(tmp_path):

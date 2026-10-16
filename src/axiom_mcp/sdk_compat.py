@@ -25,6 +25,7 @@ against and reports what it observed. Host, Origin and token policy belong to
 from __future__ import annotations
 
 import re
+import threading
 from collections.abc import AsyncIterator, Callable, Sequence
 from contextlib import AsyncExitStack, asynccontextmanager
 from dataclasses import dataclass, field
@@ -35,6 +36,7 @@ from fastapi import FastAPI
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import server as sdk_server
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -49,6 +51,18 @@ MCP_ENDPOINT_PATH = "/mcp"
 _MOUNT_PATH_PATTERN = re.compile(r"^/[A-Za-z0-9._~-]+$")
 
 _MOUNT_ATTRIBUTE = "axiom_mcp_mount"
+_SETTINGS_LOCK = threading.Lock()
+
+
+def prepare_settings() -> None:
+    """Resolve the pinned SDK's forward annotations before settings sources run.
+
+    Its generic Settings class references FastMCP before that class is defined.
+    Rebuild once the SDK module has finished importing, using its own namespace.
+    Do not filter warnings or bypass Pydantic validation.
+    """
+    with _SETTINGS_LOCK:
+        sdk_server.Settings.model_rebuild(_types_namespace=vars(sdk_server))
 
 
 class SdkCompatError(RuntimeError):
@@ -168,6 +182,7 @@ def build_server(
         transport_security = build_transport_security(
             allowed_hosts=allowed_hosts, allowed_origins=allowed_origins
         )
+    prepare_settings()
     return FastMCP(
         name=name,
         instructions=instructions,

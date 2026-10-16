@@ -18,6 +18,38 @@ axm mcp status --instance workspace
 axm mcp stop --instance workspace
 ```
 
+## When the terminal appears to wait
+
+`axmp serve` runs in the foreground. After it starts listening, the terminal
+stays open to handle MCP clients; silence while no client sends requests is
+expected. Keep this terminal open and use another terminal to inspect it:
+
+```powershell
+axmp status --instance workspace
+Invoke-RestMethod http://127.0.0.1:8765/healthz
+axmp doctor
+```
+
+Use the port selected at launch. `/healthz` returning `{"status":"ok"}` proves
+process health. `/readyz` checks query/control configuration and may return HTTP
+503 until it is ready. A listening socket or successful health probe does not
+prove client authentication or graph access. Connect the agent with its bearer
+credential, then verify `graph_status` and a bounded `graph_query`.
+
+`axm mcp` with no transport arguments, bare `axmp`, and `axmp stdio` run the
+stdio transport. They wait for a host to send MCP JSON-RPC on stdin; they do not
+open an HTTP port. Usually the agent launches this child itself. To run an HTTP
+gateway manually, use `axmp serve` as shown above. Ctrl+C stops a manually
+launched foreground process; an agent-owned stdio child ends when its host closes
+stdin. Use `axmp start` for the documented background HTTP mode.
+
+Version 0.1.11 adds these waiting explanations to startup diagnostics and resolves
+the SDK's incomplete `lifespan` settings warning before constructing either
+transport. Published 0.1.10 remains unchanged. Startup
+details stay on stderr; stdio stdout remains protocol-only and `--json` retains
+its machine result without the human banner. Request payloads and credentials are
+not printed as activity logs.
+
 Starting an identical named background configuration reuses it. A different
 configuration under that name is refused. A foreground duplicate fails without
 taking over the other process. Distinct names with distinct ports, or `--port 0`
@@ -72,3 +104,31 @@ stop the old owned instance explicitly after clients migrate. Unsupported schema
 versions are reported as incompatible instead of being mixed into cached results.
 
 Configured requests refresh trusted project bindings; an added registered project can be loaded while the gateway runs. Each request keeps its own binding snapshot, and malformed registry updates fail closed. Restart the owned gateway after credential or control-connection changes. New project registration does not grant additional token permissions.
+
+## List and select instances (0.1.11 and later)
+
+```powershell
+axm mcp list
+axm mcp list --json
+axm mcp status
+axm mcp stop --instance workspace
+```
+
+The same commands are available through `axmp`. Inventory looks only in the
+selected canonical `AXIOM_HOME`; use the same home as the server. It shows known
+instances with running state, PID, host/port, version and idle timeout. Retained
+metadata from an exited process appears stopped. Native ownership locks determine
+liveness; stale PID values are not treated as a running process. Unknown metadata
+is reported without exposing private record content.
+
+`status` without a name shows the inventory; `status --instance NAME` inspects
+that exact name. Bare `stop` selects the only running instance, even when its name
+is `workspace` rather than `default`. If none are running it says so. With multiple
+or uncertain owners it stops nothing and asks you to select a name. An explicit
+absent/stopped name reports that state with list guidance. There is no implicit
+stop-all and no kill-by-port. Stop requests remain bound to the observed owner's
+nonce, and a replacement process is preserved.
+
+Use `--json` for inventory automation. It returns `instances`, `running_count`
+and `unknown_count`. Existing explicitly named status/stop results remain JSON
+objects with `instance` and `running`; human stop guidance goes to stderr.

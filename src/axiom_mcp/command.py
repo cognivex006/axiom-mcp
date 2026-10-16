@@ -7,10 +7,14 @@ from collections.abc import Sequence
 
 USAGE = """axmp - Axiom MCP Server / Gateway
 
-USAGE: axmp [serve|stdio|http|version|doctor|update|entrypoints] [options]
+USAGE: axmp [serve|start|list|status|stop|stdio|http|version|doctor|update|entrypoints] [options]
 
 COMMANDS:
   serve    local HTTP gateway; named instance, owner and three-hour idle lifecycle
+  start    start an owned background gateway
+  list     list known gateway instances in this AXIOM_HOME
+  status   list instances, or inspect an explicit --instance
+  stop     stop the only running instance, or an explicit --instance
   stdio    host-owned MCP child process (default)
   http     local Streamable HTTP gateway; explicit Host/Origin allowlists required
   version  component/runtime versions
@@ -27,7 +31,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if arguments and arguments[0] in ("--help", "-h"):
         print(USAGE)
         return 0
-    if arguments and arguments[0] in ("serve", "start", "status", "stop"):
+    if arguments and arguments[0] in ("serve", "start", "list", "status", "stop"):
         from axiom_mcp.gateway import main as run_gateway
 
         return run_gateway(list(arguments))
@@ -48,7 +52,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         return run(arguments[1:])
     print(
-        "axmp: expected serve, stdio, http, version, doctor, update or entrypoints; "
+        "axmp: expected serve, start, list, status, stop, stdio, http, version, doctor, "
+        "update or entrypoints; "
         "use axmp --help",
         file=sys.stderr,
     )

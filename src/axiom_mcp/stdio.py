@@ -37,7 +37,7 @@ from typing import Any, TextIO
 from mcp.server.fastmcp import FastMCP
 from mcp.server.stdio import stdio_server
 
-from axiom_mcp import version
+from axiom_mcp import sdk_compat, version
 
 COMPONENT = "axiom-mcp"
 BANNER_PREFIX = "axmp: "
@@ -87,6 +87,10 @@ def banner_lines(*, protocol: str | None = None) -> tuple[str, ...]:
         f"sdk={version.SDK_PACKAGE}=={version.SDK_PIN} protocol_min={version.MCP_PROTOCOL_MINIMUM}",
         f"protocol={protocol if protocol is not None else version.MCP_PROTOCOL_MINIMUM}",
         "stdout=protocol-only stderr=diagnostics",
+        "Waiting for MCP client input on stdin; this foreground process stays open until EOF.",
+        "For an HTTP gateway use axmp serve; check configuration separately with axmp doctor.",
+        "When launched manually, Ctrl+C stops this process. "
+        "No client or graph query is verified yet.",
     )
 
 
@@ -224,6 +228,7 @@ def build_stdio_server(name: str = COMPONENT, **kwargs: Any) -> FastMCP:
     server: it answers ``initialize`` and reports its tool list.
     """
     kwargs.setdefault("log_level", "WARNING")
+    sdk_compat.prepare_settings()
     return FastMCP(name=name, **kwargs)
 
 

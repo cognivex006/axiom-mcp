@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "scope": "Only wheel-generated non-source outputs; initial tracked baseline restored, unchanged generated copies removed by exact path/hash. Public README parity shadow retained. Release builder extracts committed src/axiom_mcp into a clean staging tree.",
+  "restored": [
+    "build/lib/axiom_mcp/sdk_compat.py",
+    "build/lib/axiom_mcp/stdio.py",
+    "build/lib/axiom_mcp/tools/version.py",
+    "build/lib/axiom_mcp/version.py",
+    "src/axiom_mcp.egg-info/PKG-INFO",
+    "src/axiom_mcp.egg-info/SOURCES.txt",
+    "src/axiom_mcp.egg-info/entry_points.txt",
+    "src/axiom_mcp.egg-info/requires.txt"
+  ],
+  "removed_exact_source_copies": [
+    "build/lib/axiom_mcp/_canonical/__init__.py",
+    "build/lib/axiom_mcp/_canonical/provenance.json",
+    "build/lib/axiom_mcp/_canonical/query-request.schema.json",
+    "build/lib/axiom_mcp/_canonical/update_plan_contract.py",
+    "build/lib/axiom_mcp/command.py",
+    "build/lib/axiom_mcp/gateway.py",
+    "build/lib/axiom_mcp/retention.py",
+    "build/lib/axiom_mcp/runtime.py"
+  ]
+}

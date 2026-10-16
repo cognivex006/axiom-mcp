@@ -35,6 +35,17 @@ HTTP API with the same host/port/allowlist options using `axmp http`.
 The authenticated MCP endpoint is `/mcp`; `/healthz` reports process health and
 `/readyz` reports query/control readiness separately.
 
+`serve` keeps its terminal open while waiting for clients. In another terminal,
+run `axmp status --instance workspace`, check `/healthz`, and run `axmp doctor`.
+Bare `axm mcp` and `axmp stdio` wait for an agent to send MCP requests over stdin;
+they do not start HTTP. Quiet waiting is expected.
+Version 0.1.11 adds explicit startup guidance and resolves the SDK `lifespan`
+settings warning. A running process alone does not verify authenticated graph access.
+
+Use `axm mcp list` to see known instances and `axm mcp stop --instance workspace`
+to stop one. From 0.1.11, bare `stop` selects only a unique running instance;
+multiple or uncertain owners require an explicit name.
+
 See [local gateway lifecycle](docs/local-gateway.md) for background operation,
 multiple instances, optional owner-process binding, three-hour idle shutdown and
 bounded multi-project graph retention.

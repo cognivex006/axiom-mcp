@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ruff",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-032/ruff.txt",
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "id": "format",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-032/format.txt",
+    "sha256": "273e81e5999dffa54a2889cd098e6b1b5fa9937e557bd94fbc92a5cf43b546f0"
+  },
+  {
+    "id": "public-docs",
+    "command": [
+      "python",
+      "tools/check_public_docs.py"
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-032/public-docs.txt",
+    "sha256": "abeabe2fd78559140059da0ed81614a70bea26edbebbb21566514fcac0d0a235"
+  },
+  {
+    "id": "owner-tests",
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q"
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-032/owner-tests.txt",
+    "sha256": "3d5f13cc9a1ecca2c5615e9de332ba340b10a0510ec8124eca2184e4bc4832a0"
+  },
+  {
+    "id": "wheel",
+    "command": [
+      "python",
+      "-m",
+      "build",
+      "--wheel",
+      "--no-isolation",
+      "--outdir",
+      "<workspace>\\_coord\\release011-local-mcp-wheel"
+    ],
+    "exit_code": 0,
+    "artifact": "evidence/W-032/wheel.txt",
+    "sha256": "e5d76131feae66bbd3a97f61ebe70736eaa4f83b7f6fa7c055ef9c35f075b874"
+  }
+]
