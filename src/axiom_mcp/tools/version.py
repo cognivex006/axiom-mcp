@@ -67,7 +67,7 @@ _RELEASES = "https://github.com/orchex006/axiom-cli/releases/latest/download"
 HUMAN_COMMANDS = {
     "short_command": "axm",
     "long_form": "axm",
-    "commands": {"cli": "axm", "skills": "axsk", "graph_engine": "axge", "mcp": "axmp"},
+    "commands": {"cli": "axm", "skills": "axm skills", "graph_engine": "axge", "mcp": "axmp"},
     "update": "axm update",
     "doctor": "axm doctor",
     "version": "axm version",
@@ -81,7 +81,9 @@ HUMAN_COMMANDS = {
         "posix": f"curl -fsSL {_RELEASES}/install.sh | sh",
     },
     "note": (
-        "Use axm for orchestration, axsk for skills, axge for the graph engine and axmp for MCP. "
+        "Use axm for runtime and host lifecycle, axm skills for plugin management, "
+        "axge for graphs and axmp serve for the local gateway. "
+        "Invoke $axsk inside the agent. "
         "These are public command names; repository and component identifiers are separate."
     ),
 }

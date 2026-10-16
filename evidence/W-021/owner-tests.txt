@@ -1,0 +1,19 @@
+............................ [  3%]
+................................................ [  9%]
+....................................................................... [ 17%]
+....................................................................... [ 26%]
+...........s.......................................................................... [ 36%]
+................................................................. [ 44%]
+........................................................................ [ 52%]
+................................................................................................................................ [ 68%]
+........................................................................ [ 76%]
+...............sss...................................................... [ 85%]
+........................................................................ [ 94%]
+................................................                                              [100%]
+============================== warnings summary ===============================
+tests/test_entrypoints.py::test_the_planned_allowlist_is_the_one_the_middleware_enforces
+  <workspace>\_coord\release018-mcp-venv\Lib\site-packages\pydantic_settings\sources\utils.py:47: IncompleteFieldDefinitionWarning: Field 'lifespan' has an incomplete definition: its annotation contains an unresolved forward reference, so settings sources may fail to correctly resolve its value. Call `model_rebuild()` on the model where the field is defined, once all the referenced types are defined.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+829 passed, 5 skipped, 1 warning, 274 subtests passed in 202.40s (0:03:22)

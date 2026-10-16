@@ -54,6 +54,8 @@ target-version = "py313"
 line-length = 100
 # Immutable canonical bytes are verified by SHA-256, never reformatted here.
 extend-exclude = [
+  "build",
+  "dist",
   "src/axiom_mcp/_canonical/update_plan_contract.py",
   "tests/fixtures/pinned-spec/tests/test_redaction_policy.py",
 ]

@@ -1,26 +1,8 @@
 # Axiom MCP
 
-| Component | CLI Command | คำอ่าน | Responsibility |
-|---|---|---|---|
-| Axiom CLI | `axm` | แอ็กซ์-เอ็ม | Main CLI / Orchestrator |
-| Axiom Skills | `axsk` | แอ็กซ์-สกิล | Skills Manager |
-| Axiom Graph Engine | `axge` | แอ็กซ์-จี | Graph Engine |
-| Axiom MCP | `axmp` | แอ็กซ์-เอ็ม-พี | MCP Server / Gateway |
-
 Give your AI assistant scoped access to an Axiom code graph. The gateway exposes six tools over stdio or Streamable HTTP for bounded queries, graph status and authorized refresh requests.
 
 **[Get started](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md)** · **[Tools](https://github.com/orchex006/axiom-mcp/blob/main/docs/reference/mcp.md)** · **[Documentation](https://github.com/orchex006/axiom-mcp/blob/main/docs/README.md)** · **[Releases](https://github.com/orchex006/axiom-mcp/releases)**
-
-## How it fits together
-
-| Component | Responsibility |
-|---|---|
-| [Axiom CLI](https://github.com/orchex006/axiom-cli) | Install, update and diagnose the ecosystem with `axm` |
-| [Graph engine](https://github.com/orchex006/axiom-graphd) | Build graphs from registered source and refresh them through its daemon's file watcher |
-| Axiom MCP | Answer assistant requests from published graphs; delegate authorized control operations to the daemon |
-| [Skills](https://github.com/orchex006/axiom-skills) | Teach the assistant how to build, watch and query a graph |
-
-Build the initial graph with the engine, keep it current with the daemon, then ask the assistant to query it through MCP. MCP does not parse your source or run a file watcher. Published snapshots can support reads while the daemon is offline; automatic refresh and control operations need the daemon.
 
 ## Install
 
@@ -35,25 +17,57 @@ For standalone MCP installation, download the portable wheel and `SHA256SUMS` fr
 
 One Python wheel supports Windows x64, Linux x64 and Intel Mac. Apple silicon runtime verification remains deferred. Python and dependency requirements are declared in `pyproject.toml`.
 
-## Run
+## Update
 
-Use the installed environment's Python. Stdio is the usual choice when your assistant launches the gateway as a child process:
+Use `axm update` for the managed runtime. For standalone installations, follow
+[installation and upgrade](docs/install-and-upgrade.md) and verify the selected wheel.
+
+## Run the local API
+
+Development builds provide a named local HTTP gateway:
+
+```powershell
+axmp serve --instance workspace --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+```
+
+The serve/supervisor additions are unpublished. Published 0.1.9 can run the existing
+HTTP API with the same host/port/allowlist options using `axmp http`.
+The authenticated MCP endpoint is `/mcp`; `/healthz` reports process health and
+`/readyz` reports query/control readiness separately.
+
+See [local gateway lifecycle](docs/local-gateway.md) for background operation,
+multiple instances, optional owner-process binding, three-hour idle shutdown and
+bounded multi-project graph retention.
+
+## Connect your agent
+
+Configure `AXIOM_HOME`, `AXIOM_MCP_TOKEN_REGISTRY` and the agent's bearer credential
+reference according to [Connect your assistant](docs/install-and-upgrade.md#connect-your-assistant).
+Keep the gateway and engine's registered instance/repository bindings consistent.
+Credential configuration contains private file or environment references, not token
+values. Tool discovery and a listening endpoint do not prove graph access; verify
+an authenticated `graph_status` and bounded `graph_query` for the intended projects.
+
+For a host that launches its own MCP child, stdio remains available:
 
 ```sh
 axmp stdio --name axmp
 ```
 
-Configure `AXIOM_HOME`, `AXIOM_MCP_TOKEN_REGISTRY` and `AXIOM_MCP_TOKEN_REFERENCE` in the host's launch environment. Keep the instance home and repository bindings consistent with the engine. Credential configuration contains private file or environment references, not token values. Follow [Connect your assistant](https://github.com/orchex006/axiom-mcp/blob/main/docs/install-and-upgrade.md#connect-your-assistant) for an example.
+The child follows the host process's existing EOF lifecycle. See
+[HTTP transport](docs/http-transport.md) or [stdio transport](docs/stdio-transport.md).
+The HTTP gateway uses the same six tools, scoped authentication and query service.
 
-Tool discovery works without credentials; tool calls require registered credentials and scope. A listed server or tool is not proof of graph access.
+## How it fits together
 
-Streamable HTTP requires explicit Host and Origin allowlists:
+| Component | Responsibility |
+|---|---|
+| [Axiom CLI](https://github.com/orchex006/axiom-cli) | Install, update and diagnose the ecosystem with `axm` |
+| [Graph engine](https://github.com/orchex006/axiom-graphd) | Build graphs from registered source and refresh them through its daemon's file watcher |
+| Axiom MCP | Answer assistant requests from published graphs; delegate authorized control operations to the daemon |
+| [Skills](https://github.com/orchex006/axiom-skills) | Teach the assistant how to build, watch and query a graph |
 
-```sh
-axmp http --name axmp --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
-```
-
-HTTP listens at `/mcp` and authenticates incoming bearer credentials. Use [HTTP transport](https://github.com/orchex006/axiom-mcp/blob/main/docs/http-transport.md) for setup and probes. The CLI owns background service supervision.
+Build the initial graph with the engine, keep it current with the daemon, then ask the assistant to query it through MCP. MCP does not parse your source or run a file watcher. Published snapshots can support reads while the daemon is offline; automatic refresh and control operations need the daemon.
 
 ## Tools
 

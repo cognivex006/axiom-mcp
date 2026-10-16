@@ -108,7 +108,7 @@ def test_installation_commands_are_text_for_humans_only(tmp_path):
     assert commands["install_one_liner"]["posix"].endswith("install.sh | sh")
     assert commands["commands"] == {
         "cli": "axm",
-        "skills": "axsk",
+        "skills": "axm skills",
         "graph_engine": "axge",
         "mcp": "axmp",
     }

@@ -6,6 +6,7 @@ Start with [Installation and upgrade](install-and-upgrade.md), connect your assi
 |---|---|
 | Install MCP or update the ecosystem | [Installation and upgrade](install-and-upgrade.md) |
 | Connect a host-managed MCP process | [stdio transport](stdio-transport.md) |
+| Manage local gateway instances and graph retention | [Local gateway](local-gateway.md) |
 | Run a local HTTP gateway | [HTTP transport](http-transport.md) |
 | Search code and query relationships | [Tools, arguments and examples](reference/mcp.md) |
 | Diagnose missing credentials or graph data | [Version and doctor](cli-version-and-doctor.md) |

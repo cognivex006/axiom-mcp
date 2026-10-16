@@ -4,6 +4,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+### New Features
+
+- Add named local gateways with native process ownership, configurable three-hour idle exit and bounded multi-project parsed-generation retention. Preserve per-query authorization and graph provenance.
+
 ## 0.1.9
 
 ### Chores

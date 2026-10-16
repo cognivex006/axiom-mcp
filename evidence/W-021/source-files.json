@@ -1,0 +1,19 @@
+{
+  "docs/local-gateway.md": "b743cd0d899b2376a332f09e7a2feebae582b0485d1dbb877cd9b96e074d1354",
+  "src/axiom_mcp/gateway.py": "51ef4b659adc3c0306e3fbc16c4e613bbf2234c949b64830db1a53d211c342a3",
+  "src/axiom_mcp/retention.py": "469af8203aaac2a5e748765455c8c0436c9bf8c4b9d8b95148264f823a49a4af",
+  "tests/native_multi_project.py": "454bca1bf00730d7e2729392838f339bd25b456727cf6aa8732a6c5a981bcaf6",
+  "tests/test_gateway_lifecycle.py": "bda5ce1d68530aa1d2520c3946055a759d3ed5c3de9b00c041b578c28022570e",
+  "tests/test_gateway_retention.py": "2d3823a28da97fb0f2f770da7c384db9875ea71515ff5dec3e2712fce58c3197",
+  "Changelog.md": "54e6850571ca6fbc7e2e91ab984228eb83c4cb35c101bf0596c0ab91a67f99ec",
+  "Development.md": "701b1d8478c9b0182b1ff7421938af327140551fc124eca68436ed4dee5438b2",
+  "README.md": "cf5355a8fd6be323f5e19da6996a4e71a57698aa1455cc78191d98c55f0c32d8",
+  "docs/README.md": "4f1959f73dc7f83fd2d66dae78da3cca868c6e6b11f93c1a71391f622933414a",
+  "pyproject.toml": "2e82d876e774104db014d2b94931ebc474a31f1f8823401f90d04aefa1b4d7bf",
+  "spec.lock.json": "32f8fc9888f8a915fe54a007c895d94821322eb1ce86ea472ad614bf09632cc9",
+  "src/axiom_mcp/README.md": "cf5355a8fd6be323f5e19da6996a4e71a57698aa1455cc78191d98c55f0c32d8",
+  "src/axiom_mcp/command.py": "149c7f9757142b0cb990f8885335066797ba998ded866b1a12c12d668da12b61",
+  "src/axiom_mcp/runtime.py": "5d4b23f9c96f7577346ccbae02acf829cef122c7395d06814a8871fd573cce73",
+  "src/axiom_mcp/tools/version.py": "a0aa4a0b58be80f07672ef5b57ecddfed4826fcf2f7883b937df0d531c94293a",
+  "tests/test_tools_version.py": "9887b2c767c221773e8d4bad4c1bc26db9c5ea0ec8a355804a4e55c2c327623a"
+}
