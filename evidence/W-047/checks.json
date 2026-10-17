@@ -1,0 +1,72 @@
+[
+  {
+    "id": "wheel",
+    "command": [
+      "python",
+      "-m",
+      "build",
+      "--wheel",
+      "--no-isolation",
+      "--outdir",
+      "<workspace>\\_coord\\patch012-local-wheel"
+    ],
+    "exit_code": 0,
+    "seconds": 4.688,
+    "artifact": "evidence/W-047/wheel.txt",
+    "sha256": "5a17d387ee3651cc5157824bcd8b4b2fb69d0e03b2a762b8b52c8c5267ceb013"
+  },
+  {
+    "id": "ruff",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0,
+    "seconds": 0.393,
+    "artifact": "evidence/W-047/ruff.txt",
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "id": "format",
+    "command": [
+      "python",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "exit_code": 0,
+    "seconds": 0.17,
+    "artifact": "evidence/W-047/format.txt",
+    "sha256": "273e81e5999dffa54a2889cd098e6b1b5fa9937e557bd94fbc92a5cf43b546f0"
+  },
+  {
+    "id": "public-docs",
+    "command": [
+      "python",
+      "tools/check_public_docs.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.274,
+    "artifact": "evidence/W-047/public-docs.txt",
+    "sha256": "abeabe2fd78559140059da0ed81614a70bea26edbebbb21566514fcac0d0a235"
+  },
+  {
+    "id": "tests",
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q"
+    ],
+    "exit_code": 0,
+    "seconds": 267.297,
+    "artifact": "evidence/W-047/tests.txt",
+    "sha256": "bc10c46de68482e5323be899eb9baf201b1bb9c51b0a55a860eec82fd4e06efa"
+  }
+]
