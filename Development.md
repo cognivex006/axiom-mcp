@@ -167,3 +167,11 @@ only an unambiguous managed loopback `/readyz`, with no bearer credential and
 bounded time/body size. Its human summary preserves JSON facts and exit classes.
 Private configuration identity includes resolved credential content, so same-path
 rotation requires an explicit restart.
+
+## Authorized corrected 0.1.14 release
+
+The owner explicitly selected corrected 0.1.14 after the unpublished CLI 0.1.13
+tag exposed POSIX progress races and release evidence naming conflicts. Preserve
+all 0.1.13 tags and published owner assets. Native Windows/Linux/macOS source,
+upgrade/rollback, integrity and independent-review checks remain required. This
+release retains the owner-selected native-only scope and publishes no Docker image.
