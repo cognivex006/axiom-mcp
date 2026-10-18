@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import ctypes
 import hashlib
 import json
@@ -87,7 +88,9 @@ def read_record(path: Path) -> dict:
         return {}
 
 
-def write_record(path: Path, value: dict) -> None:
+def validate_record_owner(path: Path) -> None:
+    if path.is_symlink() or path.is_junction():
+        raise ValueError("gateway record cannot be a link")
     if path.exists():
         previous = read_record(path)
         if path.name == "state.json" and previous.get("document_kind") != "axiom-local-gateway":
@@ -98,14 +101,39 @@ def write_record(path: Path, value: dict) -> None:
             or not re.fullmatch(r"[0-9a-f]{64}", previous["nonce"])
         ):
             raise GatewayConflict("unowned stop metadata was preserved")
+
+
+def write_record(path: Path, value: dict) -> None:
+    validate_record_owner(path)
     temporary = path.with_name(path.name + "." + secrets.token_hex(8))
     try:
         with temporary.open("x", encoding="utf-8") as f:
             os.chmod(temporary, 0o600)
             json.dump(value, f)
-        os.replace(temporary, path)
+        # Normal Windows readers briefly deny delete-sharing. Keep the old
+        # atomic record intact and recheck ownership before every attempt.
+        deadline = time.monotonic() + 1.0
+        while True:
+            validate_record_owner(path)
+            try:
+                os.replace(temporary, path)
+                break
+            except OSError as error:
+                remaining = deadline - time.monotonic()
+                if (
+                    sys.platform != "win32"
+                    or getattr(error, "winerror", None) not in (5, 32, 33)
+                    or remaining <= 0
+                ):
+                    raise
+                time.sleep(min(0.025, remaining))
     finally:
-        temporary.unlink(missing_ok=True)
+        if sys.exception() is not None:
+            # A cleanup denial must not hide the original publication failure.
+            with contextlib.suppress(OSError):
+                temporary.unlink(missing_ok=True)
+        else:
+            temporary.unlink(missing_ok=True)
 
 
 class Ownership:

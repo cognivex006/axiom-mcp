@@ -6,9 +6,13 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## 0.1.14
 
+### Bug Fixes
+
+- Keep gateway startup and restart reliable when Windows readers briefly hold its status file open. Persistent permission failures still stop the operation without overwriting existing state.
+
 ### Chores
 
-- Align gateway package metadata with the 0.1.14 native distribution; runtime behavior and public contracts are unchanged.
+- Align gateway package metadata with the 0.1.14 native distribution; public contracts are unchanged.
 
 ## 0.1.13
 

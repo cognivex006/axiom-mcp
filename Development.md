@@ -175,3 +175,14 @@ tag exposed POSIX progress races and release evidence naming conflicts. Preserve
 all 0.1.13 tags and published owner assets. Native Windows/Linux/macOS source,
 upgrade/rollback, integrity and independent-review checks remain required. This
 release retains the owner-selected native-only scope and publishes no Docker image.
+
+Native Windows source verification exposed status-file publication contention
+during a rapid gateway restart. `write_record` retains atomic publication and
+revalidates managed ownership and linked-path refusal before every attempt. Only
+Windows errors 5/32/33 retry under a one-second monotonic deadline. Persistent or
+other-platform errors retain the old record and propagate; staging cleanup cannot
+hide the original failure. `tests/test_gateway_record.py` covers transient success,
+persistent refusal, changed ownership/links, original-error retention and actual
+native Windows reader handles/polling. HTTP, authentication, schema and kernel
+ownership contracts remain unchanged. A continuously held reader beyond the
+budget is deliberately a bounded failure, not an infinite startup wait.
