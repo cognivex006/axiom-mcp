@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import ipaddress
 import json
 import re
 from collections.abc import Callable, Mapping, Sequence
@@ -101,9 +102,13 @@ def is_loopback_host(host: str) -> bool:
     candidate = host.strip().lower()
     if candidate.startswith("[") and candidate.endswith("]"):
         candidate = candidate[1:-1]
-    if candidate in LOOPBACK_BIND_HOSTS:
+    if candidate == "localhost":
         return True
-    return candidate.startswith("127.")
+    try:
+        address = ipaddress.ip_address(candidate)
+    except ValueError:
+        return False
+    return address.is_loopback
 
 
 @dataclass(frozen=True)

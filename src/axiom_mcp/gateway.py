@@ -30,6 +30,7 @@ from axiom_mcp.retention import GenerationRetention
 from axiom_mcp.runtime import Runtime
 
 DEFAULT_IDLE_MINUTES = 180.0
+PREFERRED_LOCAL_PORT = 8765
 
 
 class GatewayConflict(ValueError):
@@ -225,6 +226,7 @@ def signature(args: argparse.Namespace) -> str:
         key: getattr(args, key)
         for key in (
             "instance",
+            "name",
             "host",
             "port",
             "allow_host",
@@ -243,7 +245,61 @@ def signature(args: argparse.Namespace) -> str:
         control=os.environ.get("AXIOM_CONTROL_URL", ""),
         control_reference=os.environ.get("AXIOM_CONTROL_TOKEN_REFERENCE", ""),
     )
+    # Only the final private configuration digest is retained. Never log secrets
+    # or per-secret hashes; changing a reference's contents must require restart.
+    credentials = []
+    registry = os.environ.get("AXIOM_MCP_TOKEN_REGISTRY")
+    if registry:
+        try:
+            with Path(registry).open("rb") as stream:
+                raw = stream.read(1024 * 1024 + 1)
+            if len(raw) > 1024 * 1024:
+                raise ValueError()
+            document = json.loads(raw)
+            entries = document["tokens"]
+            if not isinstance(entries, list):
+                raise ValueError()
+            if any(not isinstance(e, dict) for e in entries):
+                raise ValueError()
+            credentials = [
+                credential_identity(security.token_reference_from_config(e)) for e in entries
+            ]
+            value["registry_content"] = hashlib.sha256(raw).hexdigest()
+        except (OSError, ValueError, KeyError, TypeError, security.SecurityError):
+            raise security.SecurityError(
+                "VALIDATION_ERROR",
+                "credential registry is unreadable or invalid; existing gateway preserved",
+            ) from None
+    value["resolved_credentials"] = credentials
+    reference = os.environ.get("AXIOM_CONTROL_TOKEN_REFERENCE")
+    if reference:
+        try:
+            value["resolved_control"] = credential_identity(
+                security.token_reference_from_config(json.loads(reference))
+            )
+        except (ValueError, TypeError, AttributeError, security.SecurityError):
+            raise security.SecurityError(
+                "VALIDATION_ERROR",
+                "invalid control credential reference; existing gateway preserved",
+            ) from None
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
+def credential_identity(reference: security.TokenReference) -> str | None:
+    """Private fingerprint only; neither secrets nor per-secret digests are reported."""
+    if isinstance(reference, security.FileTokenReference):
+        try:
+            with reference.path.open("rb") as stream:
+                raw = stream.read(65537)
+        except OSError:
+            return None
+        if len(raw) > 65536:
+            raise ValueError("credential file exceeded limit")
+        text = raw.decode("utf-8").splitlines()
+        value = (text[0].strip() or None) if text else None
+    else:
+        value = reference.resolve()
+    return hashlib.sha256(value.encode("utf-8")).hexdigest() if value else None
 
 
 def inspect(name: str) -> dict:
@@ -332,26 +388,85 @@ def emit_inventory(records: list[dict], *, json_output: bool) -> None:
     print("Stop one: axm mcp stop --instance NAME")
 
 
+def bind_socket(args: argparse.Namespace) -> socket.socket:
+    """The serving process retains the socket; no probe/close/rebind race."""
+    ports = [PREFERRED_LOCAL_PORT, 0] if args.port is None else [args.port]
+    # Resolve localhost to a numeric loopback before binding; never trust DNS
+    # prefix matching or permit a resolver to select a non-loopback address.
+    host = "127.0.0.1" if args.host.lower() == "localhost" else args.host
+    for index, port in enumerate(ports):
+        try:
+            return socket.create_server(
+                (host, port),
+                family=socket.AF_INET6 if ":" in args.host else socket.AF_INET,
+            )
+        except OSError as exc:
+            import errno
+
+            if index + 1 == len(ports) or exc.errno not in {errno.EADDRINUSE, errno.EACCES}:
+                raise
+    raise AssertionError("socket selection exhausted")
+
+
+def effective_policy(args: argparse.Namespace, port: int) -> tuple[list[str], list[str]]:
+    """Defaults are exact loopback origins; explicit policies are never expanded."""
+    if (not args.allow_host or not args.allow_origin) and not http.is_loopback_host(args.host):
+        raise ValueError("non-loopback binds require explicit --allow-host and --allow-origin")
+    host = "127.0.0.1" if args.host.lower() == "localhost" else args.host
+    authority = f"[{host}]" if ":" in host else host
+    authority += f":{port}"
+    return args.allow_host or [authority], args.allow_origin or [f"http://{authority}"]
+
+
+def emit_instance(record: dict, *, json_output: bool) -> None:
+    public = public_instance(record)
+    if json_output:
+        print(json.dumps(public))
+        return
+    print(f"Axiom MCP {public.get('version', version.VERSION)}")
+    if not public.get("running"):
+        print(f"Gateway ({public['instance']}): stopped")
+        print("Next: axm mcp start")
+        return
+    state = "listening" if public.get("listening") else "starting"
+    authority = public.get("host", "127.0.0.1")
+    if ":" in authority:
+        authority = f"[{authority}]"
+    print(f"Gateway ({public['instance']}): {state}")
+    print(f"Endpoint: http://{authority}:{public.get('port', '-')}/mcp")
+    print("Graph access: checked separately; run axm mcp doctor")
+    print(f"Stop: axm mcp stop --instance {public['instance']}")
+
+
 async def run_server(args: argparse.Namespace, root: Path) -> None:
+    requested_signature = signature(args)
     runtime = Runtime.configured()
     runtime.retention = GenerationRetention(args.cache_mib * 1024 * 1024, args.cache_entries)
     owner = None
     sock = None
     try:
+        if signature(args) != requested_signature:
+            raise GatewayConflict(
+                "credential configuration changed during startup; retry the requested configuration"
+            )
         owner = OwnerWatch(args.owner_pid) if args.owner_pid else None
+        sock = bind_socket(args)
+        sock.setblocking(False)
+        actual_port = sock.getsockname()[1]
+        allowed_hosts, allowed_origins = effective_policy(args, actual_port)
         server = sdk_compat.build_server(
-            args.name, allowed_hosts=args.allow_host, allowed_origins=args.allow_origin
+            args.name, allowed_hosts=allowed_hosts, allowed_origins=allowed_origins
         )
         from axiom_mcp.runtime import compose
 
         compose(server, runtime, transport="http")
-        settings = http.HttpTransportSettings(host=args.host, port=args.port)
+        settings = http.HttpTransportSettings(host=args.host, port=actual_port)
         gateway = http.build_gateway(
             server,
             settings=settings,
             readiness=runtime.readiness,
             security=security.SecurityPolicy.build(
-                allowed_hosts=args.allow_host, allowed_origins=args.allow_origin
+                allowed_hosts=allowed_hosts, allowed_origins=allowed_origins
             ),
             authenticator=runtime.tokens,
         )
@@ -361,10 +476,6 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
         config.timeout_graceful_shutdown = 30
         config.limit_concurrency = args.max_inflight * 2
         worker = uvicorn.Server(config)
-        sock = socket.create_server(
-            (args.host, args.port), family=socket.AF_INET6 if ":" in args.host else socket.AF_INET
-        )
-        sock.setblocking(False)
         nonce = secrets.token_hex(32)
         record = dict(
             document_kind="axiom-local-gateway",
@@ -374,7 +485,7 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
             host=args.host,
             port=sock.getsockname()[1],
             version=version.VERSION,
-            signature=signature(args),
+            signature=requested_signature,
             nonce=nonce,
             idle_timeout_minutes=args.idle_timeout_minutes,
             launch_id=args.launch_id,
@@ -386,10 +497,11 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
                 await asyncio.sleep(0.05)
             if worker.started:
                 write_record(root / "state.json", {**record, "listening": True})
+                authority = f"[{args.host}]" if ":" in args.host else args.host
                 notice = dict(
                     status="listening",
                     instance=args.instance,
-                    url=f"http://{args.host}:{record['port']}/mcp",
+                    url=f"http://{authority}:{record['port']}/mcp",
                     idle_timeout_minutes=args.idle_timeout_minutes,
                     scope="process; query/control readiness are separate",
                 )
@@ -398,18 +510,19 @@ async def run_server(args: argparse.Namespace, root: Path) -> None:
                     args.notice_emitted = True
                 else:
                     print(
-                        f"axmp: HTTP server listening: {notice['url']}\n"
-                        f"axmp: instance={args.instance}; pid={os.getpid()}; "
+                        f"Axiom MCP {version.VERSION}\n"
+                        f"HTTP server listening: {notice['url']}\n"
+                        f"Gateway: {args.instance}; "
                         f"idle timeout={args.idle_timeout_minutes:g} minutes\n"
-                        "axmp: Foreground mode; this terminal stays open "
+                        "Foreground mode; this terminal stays open "
                         "while MCP clients connect.\n"
-                        f"axmp: Process health: {notice['url'].removesuffix('/mcp')}/healthz\n"
-                        f"axmp: Query/control readiness: "
+                        f"Process health: {notice['url'].removesuffix('/mcp')}/healthz\n"
+                        f"Query/control readiness: "
                         f"{notice['url'].removesuffix('/mcp')}/readyz\n"
-                        f"axmp: Status (another terminal): axmp status --instance {args.instance}\n"
-                        "axmp: Listening does not verify client credentials or graph access; "
-                        "run axmp doctor and an authenticated graph query.\n"
-                        "axmp: Waiting for clients. Stop this foreground server with Ctrl+C.",
+                        f"Status: axm mcp status --instance {args.instance}\n"
+                        "Listening does not verify client credentials or graph access; "
+                        "run axm mcp doctor and an authenticated graph query.\n"
+                        "Waiting for clients. Stop this foreground server with Ctrl+C.",
                         file=sys.stderr,
                         flush=True,
                     )
@@ -461,7 +574,9 @@ def parser() -> GatewayParser:
     p.add_argument("--instance", help="exact instance; start/serve default to default")
     p.add_argument("--name", default="axmp")
     p.add_argument("--host", default="127.0.0.1")
-    p.add_argument("--port", type=int, default=8765)
+    p.add_argument(
+        "--port", type=int, help="exact port; default tries 8765 then an available loopback port"
+    )
     p.add_argument("--allow-host", action="append", default=[])
     p.add_argument("--allow-origin", action="append", default=[])
     p.add_argument("--idle-timeout-minutes", type=float, default=DEFAULT_IDLE_MINUTES)
@@ -479,6 +594,8 @@ def main(argv: list[str] | None = None) -> int:
     options = parser()
     options.json_requested = "--json" in words
     args = options.parse_args(words)
+    if args.host.lower() == "localhost":
+        args.host = "127.0.0.1"
     try:
         if args.action == "list" or (args.action == "status" and args.instance is None):
             if args.action == "list" and args.instance is not None:
@@ -534,8 +651,7 @@ def main(argv: list[str] | None = None) -> int:
                         "The original owner exited but a replacement is running; "
                         "the replacement was not stopped. Inspect the instance before retrying"
                     )
-            result.pop("nonce", None)
-            print(json.dumps(result))
+            emit_instance(result, json_output=args.json)
             if args.action == "stop" and not args.json:
                 print(
                     f"axmp: {'Stop completed for' if was_running else 'No running gateway named'} "
@@ -543,23 +659,22 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
             return 0
-        root = directory(args.instance)
         if (
             not math.isfinite(args.idle_timeout_minutes)
             or args.idle_timeout_minutes < 0
             or min(args.cache_mib, args.cache_entries, args.max_inflight) < 1
         ):
             raise ValueError("idle and cache/concurrency budgets are invalid")
-        http.HttpTransportSettings(host=args.host, port=args.port)
-        if not args.allow_host or not args.allow_origin:
-            raise ValueError("--allow-host and --allow-origin are required")
+        http.HttpTransportSettings(host=args.host, port=0 if args.port is None else args.port)
+        # Validate the policy boundary now, derive the real port only after binding.
+        effective_policy(args, 0)
+        root = directory(args.instance)
         if args.action == "start":
             active = inspect(args.instance)
             if active["running"]:
                 if active.get("signature") != signature(args):
                     raise GatewayConflict("instance is owned by another launch configuration")
-                active.pop("nonce", None)
-                print(json.dumps(active))
+                emit_instance(active, json_output=args.json)
                 return 0
             words = list(sys.argv[1:] if argv is None else argv)
             words[0] = "serve"
@@ -588,8 +703,7 @@ def main(argv: list[str] | None = None) -> int:
                     and active.get("listening")
                 ):
                     # Readiness is reported separately; a process lock is not a query proof.
-                    active.pop("nonce", None)
-                    print(json.dumps(active))
+                    emit_instance(active, json_output=args.json)
                     return 0
                 time.sleep(0.1)
             raise TimeoutError("gateway startup timed out; inspect axm mcp status before retrying")
@@ -607,7 +721,7 @@ def main(argv: list[str] | None = None) -> int:
         return failure(args, 6, str(exc))
     except TimeoutError as exc:
         return failure(args, 7, str(exc))
-    except ValueError as exc:
+    except (ValueError, http.HttpTransportError) as exc:
         return failure(args, 2, str(exc))
     except (OSError, GatewayOperationError, security.SecurityError, GuardError) as exc:
         return failure(args, 4, str(exc))

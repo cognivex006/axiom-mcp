@@ -4,6 +4,18 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.13
+
+### New Features
+
+- Start a local gateway with `axm mcp start` and select an available loopback port automatically.
+- Show concise Axiom version and doctor summaries, with detailed build and compatibility information under `--verbose` or `--json`.
+
+### Bug Fixes
+
+- Observe managed query and control readiness instead of always reporting an unwired transport.
+- Reject misleading loopback hostnames and detect changed credential contents before reusing a gateway process.
+
 ## 0.1.12
 
 ### Chores

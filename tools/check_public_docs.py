@@ -63,7 +63,8 @@ def check_wheel(path: Path, expected_readme: bytes) -> list[str]:
             errors.append(f"{path.name}: packaged README differs from source")
         for name in (readme, metadata[0]):
             errors.extend(findings(f"{path.name}/{name}", archive.read(name).decode("utf-8")))
-        text = archive.read(metadata[0]).decode("utf-8")
+        # RFC-style METADATA from Windows setuptools uses CRLF line endings.
+        text = archive.read(metadata[0]).decode("utf-8").replace("\r\n", "\n")
         if text.split("\n\n", 1)[-1].rstrip() != expected_readme.decode("utf-8").rstrip():
             errors.append(f"{path.name}: METADATA long description differs from source")
     return errors

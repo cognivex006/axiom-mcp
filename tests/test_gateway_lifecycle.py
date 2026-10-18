@@ -105,7 +105,15 @@ def test_listening_notice_is_actionable_without_claiming_query_readiness(tmp_pat
         assert httpx.get(f"{base}/healthz").json() == {"status": "ok"}
         assert httpx.get(f"{base}/readyz").status_code == 503
         status = subprocess.run(
-            [sys.executable, "-m", "axiom_mcp.gateway", "status", "--instance", "diagnostics"],
+            [
+                sys.executable,
+                "-m",
+                "axiom_mcp.gateway",
+                "status",
+                "--instance",
+                "diagnostics",
+                "--json",
+            ],
             env=environment(tmp_path),
             capture_output=True,
             timeout=15,
@@ -128,8 +136,8 @@ def test_listening_notice_is_actionable_without_claiming_query_readiness(tmp_pat
             "HTTP server listening:",
             f"{base}/healthz",
             f"{base}/readyz",
-            "axmp status --instance diagnostics",
-            "axmp doctor",
+            "axm mcp status --instance diagnostics",
+            "axm mcp doctor",
             "Listening does not verify client credentials or graph access",
             "Waiting for clients",
             "Ctrl+C",

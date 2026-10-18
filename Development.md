@@ -154,3 +154,16 @@ The user explicitly requested merge and release as 0.1.10 on 2026-10-16. This re
 ## Authorized 0.1.11 patch release
 
 The user explicitly requested all reported fixes and merge/release as 0.1.11 on 2026-10-16. This supersedes prior feature-only restrictions. Preserve installed user state and immutable historical Releases/tags. Main integration, new release branches/tags and publication require independent changed-contract review, required owner/native checks, exact source/artifact binding and actual previous-release upgrade/rollback.
+
+## Terminal UX development
+
+For CLI, installer, bootstrap, interactive setup and long-running terminal changes, consult the canonical [cli-terminal-ux skill](https://github.com/orchex006/axiom-cli/blob/main/.agents/skills/cli-terminal-ux/SKILL.md) by default. Resolve its normative contract through the verified spec pin; retain native visual evidence and existing ownership/approval/release rules. Other repositories link that source rather than maintaining edited copies.
+
+The current 2026-10-18 owner request explicitly authorizes the scoped 0.1.13 implementation, integration and new immutable publication after mandatory native/visual, independent review and previous-release rollback/source-hash gates. Preserve real user state and historical tags/assets.
+
+Gateway defaults are covered by `tests/test_gateway_defaults.py`; native owned
+process boundaries remain in `tests/test_gateway_lifecycle.py`. Doctor observes
+only an unambiguous managed loopback `/readyz`, with no bearer credential and
+bounded time/body size. Its human summary preserves JSON facts and exit classes.
+Private configuration identity includes resolved credential content, so same-path
+rotation requires an explicit restart.

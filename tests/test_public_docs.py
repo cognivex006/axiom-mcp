@@ -122,6 +122,10 @@ def test_wheel_readme_metadata_and_source_parity_are_checked(tmp_path):
     readme = (ROOT / "README.md").read_bytes()
     path = wheel(tmp_path / "valid.whl", readme)
     assert GUARD.check_wheel(path, readme) == []
+    path = wheel(
+        tmp_path / "windows.whl", readme, (b"Name: axiom-mcp\n\n" + readme).replace(b"\n", b"\r\n")
+    )
+    assert GUARD.check_wheel(path, readme) == []
     path = wheel(tmp_path / "leaked.whl", readme, b"Name: axiom-mcp\n\nFollow C-028")
     errors = GUARD.check_wheel(path, readme)
     assert any("C-028" in item for item in errors)

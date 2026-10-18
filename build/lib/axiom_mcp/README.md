@@ -22,33 +22,30 @@ One Python wheel supports Windows x64, Linux x64 and Intel Mac. Apple silicon ru
 Use `axm update` for the managed runtime. For standalone installations, follow
 [installation and upgrade](docs/install-and-upgrade.md) and verify the selected wheel.
 
-## Run the local API
+## Start the local gateway
 
-Development builds provide a named local HTTP gateway:
+MCP is part of the Axiom installation. Use the same `axm` command for its lifecycle:
 
-```powershell
-axmp serve --instance workspace --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+```sh
+axm mcp start
+axm mcp status
+axm mcp doctor
 ```
 
-Version 0.1.10 adds serve and background supervision. Published 0.1.9 can run the existing
-HTTP API with the same host/port/allowlist options using `axmp http`.
-The authenticated MCP endpoint is `/mcp`; `/healthz` reports process health and
-`/readyz` reports query/control readiness separately.
+The gateway binds loopback, prefers port 8765 and selects another available port
+when that port is occupied. Use the endpoint printed at startup for your client.
+Starting the same configuration again reuses its owned process. Explicit ports
+are respected and fail if occupied. Authentication and project permissions still
+apply; a listening endpoint alone does not establish graph access.
 
-`serve` keeps its terminal open while waiting for clients. In another terminal,
-run `axmp status --instance workspace`, check `/healthz`, and run `axmp doctor`.
-Bare `axm mcp` and `axmp stdio` wait for an agent to send MCP requests over stdin;
-they do not start HTTP. Quiet waiting is expected.
-Version 0.1.11 adds explicit startup guidance and resolves the SDK `lifespan`
-settings warning. A running process alone does not verify authenticated graph access.
+`axm doctor` checks the installation and also reports MCP readiness separately.
+Use `axm mcp doctor --verbose` for connection, credential and compatibility details.
+`axm mcp version` shows the component version; `--verbose` adds build details.
 
-Use `axm mcp list` to see known instances and `axm mcp stop --instance workspace`
-to stop one. From 0.1.11, bare `stop` selects only a unique running instance;
-multiple or uncertain owners require an explicit name.
-
-See [local gateway lifecycle](docs/local-gateway.md) for background operation,
-multiple instances, optional owner-process binding, three-hour idle shutdown and
-bounded multi-project graph retention.
+Stop the only running gateway with `axm mcp stop`. When several instances exist,
+use `axm mcp list` and `axm mcp stop --instance NAME`. For foreground operation,
+use `axm mcp serve`; Ctrl+C stops that foreground server. See the
+[local gateway guide](docs/local-gateway.md) for lifetime, ports and multiple clients.
 
 ## Connect your agent
 

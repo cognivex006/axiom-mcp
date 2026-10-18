@@ -1,61 +1,65 @@
 # Local graph gateway
 
-`axmp serve` and the supervisor commands below require Axiom 0.1.10 or later.
-Published 0.1.9 supports the existing `axmp http` and `axmp stdio` forms.
-
 ## Start and stop
 
-```powershell
-axmp serve --instance workspace --host 127.0.0.1 --port 8765 --allow-host 127.0.0.1:8765 --allow-origin http://127.0.0.1:8765
+```sh
+axm mcp start
+axm mcp status
+axm mcp doctor
 ```
 
-This foreground process exits on normal terminal interruption. The same launch
-options work with `axm mcp start` to run a background gateway. Inspect and stop the
-owned instance with:
+Start selects an available loopback port and prints the actual MCP endpoint.
+It prefers 8765 and falls back to an operating-system-assigned port if necessary.
+The serving process retains its socket throughout startup. No process using
+another port is stopped or taken over.
 
-```powershell
-axm mcp status --instance workspace
-axm mcp stop --instance workspace
+The default Host and Origin policies name that exact loopback address and port.
+Keep the endpoint printed by `start` in your client configuration. Client bearer
+credentials and registered graph permissions remain required.
+
+```sh
+axm mcp stop
 ```
 
-## When the terminal appears to wait
+Bare stop selects only one unambiguous owned process. With several instances,
+list them and select the intended name:
 
-`axmp serve` runs in the foreground. After it starts listening, the terminal
-stays open to handle MCP clients; silence while no client sends requests is
-expected. Keep this terminal open and use another terminal to inspect it:
-
-```powershell
-axmp status --instance workspace
-Invoke-RestMethod http://127.0.0.1:8765/healthz
-axmp doctor
+```sh
+axm mcp list
+axm mcp start --instance other
+axm mcp stop --instance other
 ```
 
-Use the port selected at launch. `/healthz` returning `{"status":"ok"}` proves
-process health. `/readyz` checks query/control configuration and may return HTTP
-503 until it is ready. A listening socket or successful health probe does not
-prove client authentication or graph access. Connect the agent with its bearer
-credential, then verify `graph_status` and a bounded `graph_query`.
+Repeated start reuses only an identical configuration. Changing its runtime,
+name, policies or credential contents requires an explicit stop/restart. An
+existing process is preserved when the requested configuration conflicts.
+For a fixed port use `--port 8765`; a busy explicit port fails without fallback.
+`--port 0` always requests an assigned port. Explicit Host/Origin policies are
+kept exactly as supplied; they are never widened by automatic port selection.
+Non-loopback operation requires explicit policies and the transport's existing
+security requirements.
 
-`axm mcp` with no transport arguments, bare `axmp`, and `axmp stdio` run the
-stdio transport. They wait for a host to send MCP JSON-RPC on stdin; they do not
-open an HTTP port. Usually the agent launches this child itself. To run an HTTP
-gateway manually, use `axmp serve` as shown above. Ctrl+C stops a manually
-launched foreground process; an agent-owned stdio child ends when its host closes
-stdin. Use `axmp start` for the documented background HTTP mode.
+## Readiness and foreground operation
 
-Version 0.1.11 adds these waiting explanations to startup diagnostics and resolves
-the SDK's incomplete `lifespan` settings warning before constructing either
-transport. Published 0.1.10 remains unchanged. Startup
-details stay on stderr; stdio stdout remains protocol-only and `--json` retains
-its machine result without the human banner. Request payloads and credentials are
-not printed as activity logs.
+`axm doctor` retains its installation exit status and reports MCP separately.
+`axm mcp doctor` observes a unique managed gateway's query and control readiness;
+it does not start a service or send credentials. Ambiguous instances or an
+unavailable probe cannot establish readiness. Credentials are checked separately
+from whether a process is listening. Use `--verbose` or `--json` for details.
 
-Starting an identical named background configuration reuses it. A different
-configuration under that name is refused. A foreground duplicate fails without
-taking over the other process. Distinct names with distinct ports, or `--port 0`
-for automatic socket assignment, support separate simultaneous gateways. Inspect
-status for the actual assigned port. Host/Origin allowlists stay explicit; an
-allowlisted host without a port admits that host across ports.
+`/healthz` reports process health. `/readyz` reports query and control readiness
+separately and may return 503 while configuration is incomplete. Verify an
+authenticated `graph_status` and bounded `graph_query` for the intended projects
+before relying on graph results.
+
+```sh
+axm mcp serve
+```
+
+Foreground serve keeps its terminal open while handling clients. Ctrl+C stops it.
+Bare `axm mcp`, bare `axmp` and `axmp stdio` use stdio instead; they wait for the
+agent's JSON-RPC input and end when its host closes stdin. `axmp` remains the
+standalone entrypoint to the same component.
 
 ## Lifetime and memory
 

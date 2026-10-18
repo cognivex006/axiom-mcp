@@ -26,16 +26,69 @@ problems with different fixes.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import pathlib
 import subprocess
 import sys
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from axiom_mcp import errors, http, security, update, version
+
+
+def managed_readiness() -> http.ReadinessReport:
+    """Observe a unique owned loopback gateway; never start or authenticate it."""
+    import httpx
+
+    from axiom_mcp import gateway
+
+    unavailable = http.default_readiness()
+    try:
+        rows = [r for r in gateway.instances() if r.get("running") is not False]
+        if len(rows) != 1 or rows[0].get("running") is not True:
+            return unavailable
+        record = rows[0]
+        host = record.get("host", "")
+        host = "127.0.0.1" if host == "localhost" else host
+        if not ipaddress.ip_address(host).is_loopback:
+            return unavailable
+        port = record.get("port")
+        if type(port) is not int or not 0 < port < 65536:
+            return unavailable
+        authority = f"[{host}]" if ":" in host else host
+        deadline = time.monotonic() + 1.5
+        with httpx.Client(timeout=0.3, trust_env=False, follow_redirects=False) as client:
+            with client.stream(
+                "GET", f"http://{authority}:{port}/readyz", headers={"Accept-Encoding": "identity"}
+            ) as response:
+                if response.status_code not in (200, 503):
+                    return unavailable
+                if response.headers.get("content-encoding", "identity") != "identity":
+                    return unavailable
+                body = bytearray()
+                for chunk in response.iter_raw():
+                    body.extend(chunk)
+                    if len(body) > 65536 or time.monotonic() > deadline:
+                        return unavailable
+        data = json.loads(body)
+        planes = []
+        for name in ("query", "control"):
+            plane = data[name]
+            if type(plane["available"]) is not bool:
+                return unavailable
+            planes.append(
+                http.ComponentReadiness(
+                    name, plane["available"], "observed managed gateway /readyz"
+                )
+            )
+        return http.ReadinessReport(*planes)
+    except (OSError, ValueError, KeyError, TypeError, httpx.HTTPError):
+        return unavailable
+
 
 # Canonical CLI exit codes from docs/16-CLI-AND-CONTROL-API.md section 6.
 EXIT_SUCCESS = 0
@@ -356,7 +409,7 @@ def collect_environment(
         surface = tuple(version.sdk_surface_reasons(resolver=resolver))
     except Exception as exc:  # noqa: BLE001 - same reasoning as above
         surface = (f"sdk_surface_probe_failed:{type(exc).__name__}",)
-    readiness = http.default_readiness()
+    readiness = managed_readiness()
     return DoctorEnvironment(
         python_version=(sys.version_info.major, sys.version_info.minor, sys.version_info.micro),
         sdk_version=sdk_version,
@@ -528,26 +581,72 @@ def doctor_report(env: DoctorEnvironment) -> dict[str, Any]:
     }
 
 
-def format_doctor_text(report: Mapping[str, Any]) -> str:
+def format_doctor_text(report: Mapping[str, Any], *, verbose: bool = False) -> str:
     """Render the report for a human without losing the machine facts."""
+    if not verbose:
+        sections = {s["name"]: s for s in report["sections"]}
+        compatible = all(
+            sections[name]["status"] == STATUS_OK
+            for name in ("sdk_surface", "protocol", "dimensions")
+        )
+        ready = sections["readiness"].get("details", {})
+        status = "ready" if report["ok"] else "NotReady"
+        credentials = {
+            STATUS_OK: "OK",
+            STATUS_WARN: "not configured",
+            STATUS_FAIL: "needs attention",
+        }[sections["credentials"]["status"]]
+        return "\n".join(
+            [
+                f"Axiom MCP {report['version']}",
+                f"Status: {status} (exit {report['exit_code']})",
+                "Runtime: "
+                + ("OK" if sections["runtime"]["status"] == STATUS_OK else "needs attention"),
+                "Compatibility: " + ("OK" if compatible else "needs attention"),
+                f"Credentials: {credentials}",
+                "Graph queries: "
+                + ("ready" if ready.get("query_plane_available") else "unavailable"),
+                "Graph refresh: "
+                + ("ready" if ready.get("control_plane_available") else "unavailable"),
+                "Details: axm mcp doctor --verbose",
+            ]
+        )
     lines = [
-        f"Axiom MCP (axmp) {report['version']} (build {report['build_revision']})",
-        f"spec {report['spec_version']} @ {report['spec_revision']}",
+        f"Axiom MCP {report['version']}",
         f"verdict: {report['verdict']} (exit {report['exit_code']})",
     ]
+    if verbose:
+        lines.extend(
+            [
+                f"build: {report['build_revision']}",
+                f"spec: {report['spec_version']} @ {report['spec_revision']}",
+            ]
+        )
     for section in report["sections"]:
         line = f"  {section['name']:<12} {section['status']}"
-        if section["reasons"]:
+        if verbose and section["reasons"]:
             line += "  " + ", ".join(section["reasons"])
         lines.append(line)
     if report["warnings"]:
         lines.append(f"warnings: {', '.join(report['warnings'])}")
+    if not report["ok"]:
+        lines.append(
+            "Next: axm mcp start; then check credentials and graph access "
+            "with axm mcp doctor --verbose"
+        )
     return "\n".join(lines)
 
 
-def format_version_text(report: Mapping[str, Any]) -> str:
+def format_version_text(report: Mapping[str, Any], *, verbose: bool = False) -> str:
     """Render the version report as one ``key: value`` line per contract field."""
-    return "\n".join(f"{field}: {report[field]}" for field in version.VERSION_REPORT_FIELDS)
+    headline = f"Axiom MCP {report['version']}"
+    if not verbose:
+        return headline
+    return (
+        headline
+        + "\n"
+        + "\n".join(f"{field}: {report[field]}" for field in version.VERSION_REPORT_FIELDS)
+    )
 
 
 def exit_code_for_error(error: errors.AxiomError) -> int:
@@ -582,6 +681,9 @@ def build_parser() -> argparse.ArgumentParser:
     version_parser.add_argument(
         "--json", action="store_true", help="Emit a single JSON object on stdout."
     )
+    version_parser.add_argument(
+        "--verbose", action="store_true", help="Include build and compatibility details."
+    )
 
     doctor_parser = subcommands.add_parser(
         "doctor", help="Diagnose runtime pins, SDK surface, scope and readiness."
@@ -594,6 +696,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="PATH",
         help="Credential registry that names token references; no token value is read.",
+    )
+    doctor_parser.add_argument(
+        "--verbose", action="store_true", help="Include detailed diagnostic reasons."
     )
 
     update_parser = subcommands.add_parser(
@@ -632,12 +737,14 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _run_version(*, as_json: bool, environ: Mapping[str, str] | None = None) -> int:
+def _run_version(
+    *, as_json: bool, environ: Mapping[str, str] | None = None, verbose: bool = False
+) -> int:
     report = version.version_report(resolve_build_revision(environ), "not_checked")
     if as_json:
         print(json.dumps(report, ensure_ascii=False))
     else:
-        print(format_version_text(report))
+        print(format_version_text(report, verbose=verbose))
     return EXIT_SUCCESS
 
 
@@ -646,13 +753,14 @@ def _run_doctor(
     as_json: bool,
     environ: Mapping[str, str] | None = None,
     registry_path: str | None = None,
+    verbose: bool = False,
 ) -> int:
     environment = collect_environment(environ, registry_path=registry_path)
     report = doctor_report(environment)
     if as_json:
         print(json.dumps(report, ensure_ascii=False))
     else:
-        print(format_doctor_text(report))
+        print(format_doctor_text(report, verbose=verbose))
     return int(report["exit_code"])
 
 
@@ -743,9 +851,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SystemExit as exc:  # --help and --version write and exit zero
         return int(exc.code or 0)
     if args.command == "version":
-        return _run_version(as_json=args.json)
+        return _run_version(as_json=args.json, verbose=args.verbose)
     if args.command == "doctor":
-        return _run_doctor(as_json=args.json, registry_path=args.registry)
+        return _run_doctor(as_json=args.json, registry_path=args.registry, verbose=args.verbose)
     if args.command == "update":
         if args.update_command == "check":
             return _run_update_check(

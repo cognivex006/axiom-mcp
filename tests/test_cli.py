@@ -80,11 +80,16 @@ class VersionCommandTests(unittest.TestCase):
         self.assertEqual(err, "")
 
     def test_version_text_mode_names_every_contract_field(self):
-        code, out, _ = captured_main(["version"])
+        code, out, _ = captured_main(["version", "--verbose"])
         self.assertEqual(code, cli.EXIT_SUCCESS)
         for field in version.VERSION_REPORT_FIELDS:
             with self.subTest(field=field):
                 self.assertIn(f"{field}:", out)
+
+    def test_default_version_is_one_product_line(self):
+        code, out, _ = captured_main(["version"])
+        self.assertEqual(code, cli.EXIT_SUCCESS)
+        self.assertEqual(out, f"Axiom MCP {version.VERSION}\n")
 
     def test_build_revision_prefers_the_explicit_setting_over_the_probe(self):
         environ = {cli.BUILD_REVISION_ENV: "release-2026.09.19"}
@@ -417,8 +422,9 @@ class CommandIntegrationTests(unittest.TestCase):
 
     def test_doctor_text_mode_is_readable_and_keeps_the_verdict(self):
         code, out, _ = captured_main(["doctor"])
-        self.assertEqual(code, cli.EXIT_SUCCESS if "verdict: ready" in out else cli.EXIT_NOT_READY)
-        self.assertIn("verdict:", out)
+        self.assertIn(f"(exit {code})", out)
+        self.assertEqual(code == 0, "Status: ready" in out)
+        self.assertIn("Graph queries:", out)
 
     def test_setup_py_entry_point_target_exists(self):
         self.assertTrue(callable(cli.main))
