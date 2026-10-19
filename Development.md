@@ -186,3 +186,13 @@ persistent refusal, changed ownership/links, original-error retention and actual
 native Windows reader handles/polling. HTTP, authentication, schema and kernel
 ownership contracts remain unchanged. A continuously held reader beyond the
 budget is deliberately a bounded failure, not an infinite startup wait.
+
+## Authorized 0.1.15 inventory correction release
+
+The owner explicitly requested 0.1.15 on 2026-10-19. Integrate the reviewed
+registration-first guides and complete-inventory correction, align four package
+owners required by the existing composer, and publish only new immutable 15
+branches/tags/assets after exact native source, composition and actual 0.1.14
+upgrade/rollback checks. Preserve older releases and actual user state. Native-only
+scope persists; no Docker image is published. Terminal renderer implementation
+is unchanged; current native captures do not imply new manual GUI or WSL tests.

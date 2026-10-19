@@ -4,6 +4,12 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+## 0.1.15
+
+### Chores
+
+- Align portable gateway package metadata with the 0.1.15 distribution. Query, transport, authentication and runtime behavior are unchanged.
+
 ## 0.1.14
 
 ### Bug Fixes
