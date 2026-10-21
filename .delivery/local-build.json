@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "repository": "axiom-mcp",
+  "check": [
+    [
+      "python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q"
+    ],
+    [
+      "python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    [
+      "python",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    [
+      "python",
+      "tools/check_public_docs.py"
+    ]
+  ],
+  "build": [
+    [
+      "python",
+      "release/build_portable_wheel.py",
+      "--source-revision",
+      "{source}",
+      "--out-dir",
+      "{out}"
+    ]
+  ]
+}

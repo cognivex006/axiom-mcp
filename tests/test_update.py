@@ -68,7 +68,7 @@ class _SpecsCase(unittest.TestCase):
             dict(
                 plan["downloads"][0],
                 artifact="axiom-mcp-0.2.0-windows-x64.zip",
-                url="https://github.com/orchex006/axiom-mcp/releases/download/v0.2.0/"
+                url="https://github.com/cognivex006/axiom-mcp/releases/download/v0.2.0/"
                 "axiom-mcp-0.2.0-windows-x64.zip",
             )
         ]

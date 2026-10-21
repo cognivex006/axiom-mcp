@@ -1,0 +1,15 @@
+{
+  "task_id": "W-075",
+  "source_repo": "axiom-mcp",
+  "branch": "feature/w-075-local-delivery",
+  "base_revision": "be013818df80ae2073de38f62ad226110831aada",
+  "spec_revision": "4ef9d1d5be0588e85df3a437efa2ae6df2f81245",
+  "status": "source_verified",
+  "push_remote": "https://github.com/cognivex006/axiom-mcp",
+  "release_publication": "withheld_until_rebuilt",
+  "latest_real_cached_version": "0.1.15",
+  "native_release_lanes": "Namespace-migrated Windows/Linux/macOS release acceptance and publication remain pending; historical cached binaries are not republished.",
+  "verification_artifact": "evidence/W-075/checks.json",
+  "verification_artifact_sha256": "562b72c536e3320a2422bce44bc2159c1b129d7a538b8a642af3880b5c9b9bb5",
+  "git_delivery": "Exact committed and remote source revisions are recorded by the canonical specification coordinator after feature push."
+}

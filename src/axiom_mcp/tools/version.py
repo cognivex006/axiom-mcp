@@ -63,7 +63,7 @@ _ARGUMENTS = ("components", "check_update")
 
 #: ADR-0036 / L-018: the commands a *human* runs to install, check or update Axiom. They are
 #: reported as text so an agent can tell the user exactly what to type; this tool never runs them.
-_RELEASES = "https://github.com/orchex006/axiom-cli/releases/latest/download"
+_RELEASES = "https://github.com/cognivex006/axiom-cli/releases/latest/download"
 HUMAN_COMMANDS = {
     "short_command": "axm",
     "long_form": "axm",

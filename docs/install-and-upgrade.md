@@ -1,6 +1,6 @@
 # Installation and upgrade
 
-Use the [Axiom CLI installation guide](https://github.com/orchex006/axiom-cli/blob/main/docs/INSTALL.md) for the complete ecosystem. The CLI provisions the graph engine, MCP runtime and skills bundle. Registering a project and connecting an assistant are separate setup steps.
+Use the [Axiom CLI installation guide](https://github.com/cognivex006/axiom-cli/blob/main/docs/INSTALL.md) for the complete ecosystem. The CLI provisions the graph engine, MCP runtime and skills bundle. Registering a project and connecting an assistant are separate setup steps.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ MCP does not require an application compiler or start the graph daemon for read-
 
 ## Install a standalone wheel
 
-Download the wheel and `SHA256SUMS` from the same [release](https://github.com/orchex006/axiom-mcp/releases). Verify the wheel's SHA-256 against that file before installation. Replace `<version>` with the downloaded release version.
+Download the wheel and `SHA256SUMS` from the same [release](https://github.com/cognivex006/axiom-mcp/releases). Verify the wheel's SHA-256 against that file before installation. Replace `<version>` with the downloaded release version.
 
 Windows PowerShell:
 
@@ -34,7 +34,7 @@ On Linux, `sha256sum` is an alternative checksum command. Use the created enviro
 
 ## Connect your assistant
 
-Build the selected solution's first graph with the engine. For automatic updates after a save, keep the graph daemon running in the authorized instance. Use the [graph skills workflow](https://github.com/orchex006/axiom-skills/blob/main/docs/guides/graph-lifecycle.md) if your assistant has the Axiom plugin.
+Build the selected solution's first graph with the engine. For automatic updates after a save, keep the graph daemon running in the authorized instance. Use the [graph skills workflow](https://github.com/cognivex006/axiom-skills/blob/main/docs/guides/graph-lifecycle.md) if your assistant has the Axiom plugin.
 
 Configure these values in the host's MCP launch environment:
 
@@ -93,7 +93,7 @@ Run these with the installed environment's console entrypoint. Doctor checks run
 
 ## Update and rollback
 
-For a CLI-managed installation, use `axm update` and follow its printed plan. The [ecosystem update guide](https://github.com/orchex006/axiom-cli/blob/main/docs/INSTALL.md) documents bootstrap scripts and repair behavior.
+For a CLI-managed installation, use `axm update` and follow its printed plan. The [ecosystem update guide](https://github.com/cognivex006/axiom-cli/blob/main/docs/INSTALL.md) documents bootstrap scripts and repair behavior.
 
 `axmp update check` reports MCP availability. `axmp update apply --plan <plan.json> --approve-digest <digest>` validates the reviewed plan and delegates it to the installed core updater. See [update-plan delegation](update-plan-delegation.md). MCP tool calls do not download or apply updates.
 

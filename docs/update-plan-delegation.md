@@ -37,7 +37,7 @@ infer it from the status.
 ### Origin trust
 
 An update origin is trusted only when it is the canonical repository
-(`https://github.com/orchex006/axiom-mcp`) or when the owner added it to
+(`https://github.com/cognivex006/axiom-mcp`) or when the owner added it to
 `AXIOM_MCP_UPDATE_ALLOWED_ORIGINS` (comma separated). Any other origin is reported as
 `blocked` with `origin_not_allowlisted:<value>` and is never contacted. There is no
 "guess the owner" path: the specification's draft placeholders are refused rather than

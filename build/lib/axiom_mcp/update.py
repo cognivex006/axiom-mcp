@@ -73,7 +73,7 @@ AUTO_APPLY_ENV = "AXIOM_MCP_UPDATE_AUTO_APPLY"
 
 # An origin is only trusted when it is the canonical repository or when the owner
 # added it to the configured allowlist. A guessed owner is refused, never contacted.
-CANONICAL_ORIGIN = "https://github.com/orchex006/axiom-mcp"
+CANONICAL_ORIGIN = "https://github.com/cognivex006/axiom-mcp"
 ALLOWED_ORIGINS: tuple[str, ...] = (CANONICAL_ORIGIN,)
 ALLOWED_ORIGINS_ENV = "AXIOM_MCP_UPDATE_ALLOWED_ORIGINS"
 

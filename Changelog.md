@@ -1,8 +1,13 @@
 # Changelog
 
-User-visible changes, newest first. Download wheels and checksum records from [GitHub Releases](https://github.com/orchex006/axiom-mcp/releases).
+User-visible changes, newest first. Download wheels and checksum records from [GitHub Releases](https://github.com/cognivex006/axiom-mcp/releases).
 
 ## Unreleased
+
+### Chores
+
+- Move repository and download references to cognivex006 and run verification/builds on operator-managed machines instead of GitHub Actions.
+
 
 ## 0.1.15
 
@@ -102,7 +107,7 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 - Align the portable package version with the improved ecosystem release. Tool names, schemas, dependencies and permissions are unchanged.
 - Check public documentation, generated release notes and packaged wheel README/METADATA for internal identifiers before delivery.
 
-Full Changelog: [v0.1.5…v0.1.6](https://github.com/orchex006/axiom-mcp/compare/v0.1.5...v0.1.6)
+Full Changelog: [v0.1.5…v0.1.6](https://github.com/cognivex006/axiom-mcp/compare/v0.1.5...v0.1.6)
 
 ## 0.1.5
 
@@ -111,7 +116,7 @@ Full Changelog: [v0.1.5…v0.1.6](https://github.com/orchex006/axiom-mcp/compare
 - Add installation commands to `graph_version`: identify `axm` and `axiom-cli`, show version/doctor/update/removal commands and provide the installation/update URLs.
 - Keep `graph_version` read-only; it reports commands without installing or updating software.
 
-Full Changelog: [v0.1.4…v0.1.5](https://github.com/orchex006/axiom-mcp/compare/v0.1.4...v0.1.5)
+Full Changelog: [v0.1.4…v0.1.5](https://github.com/cognivex006/axiom-mcp/compare/v0.1.4...v0.1.5)
 
 ## 0.1.4
 
@@ -119,7 +124,7 @@ Full Changelog: [v0.1.4…v0.1.5](https://github.com/orchex006/axiom-mcp/compare
 
 - Align the package version with the ecosystem release that introduces one-line update scripts. MCP tool behavior is unchanged.
 
-Full Changelog: [v0.1.3…v0.1.4](https://github.com/orchex006/axiom-mcp/compare/v0.1.3...v0.1.4)
+Full Changelog: [v0.1.3…v0.1.4](https://github.com/cognivex006/axiom-mcp/compare/v0.1.3...v0.1.4)
 
 ## 0.1.3
 
@@ -127,7 +132,7 @@ Full Changelog: [v0.1.3…v0.1.4](https://github.com/orchex006/axiom-mcp/compare
 
 - Align the package version with the ecosystem's one-line installer release. MCP tool behavior is unchanged.
 
-Full Changelog: [v0.1.2…v0.1.3](https://github.com/orchex006/axiom-mcp/compare/v0.1.2...v0.1.3)
+Full Changelog: [v0.1.2…v0.1.3](https://github.com/cognivex006/axiom-mcp/compare/v0.1.2...v0.1.3)
 
 ## 0.1.2
 
@@ -148,7 +153,7 @@ Full Changelog: [v0.1.2…v0.1.3](https://github.com/orchex006/axiom-mcp/compare
 
 - Native MCP protocol checks do not establish integration with a particular licensed AI-host application. Apple silicon runtime verification remains deferred.
 
-Full Changelog: [v0.1.1…v0.1.2](https://github.com/orchex006/axiom-mcp/compare/v0.1.1...v0.1.2)
+Full Changelog: [v0.1.1…v0.1.2](https://github.com/cognivex006/axiom-mcp/compare/v0.1.1...v0.1.2)
 
 ## 0.1.1
 
@@ -160,7 +165,7 @@ Full Changelog: [v0.1.1…v0.1.2](https://github.com/orchex006/axiom-mcp/compare
 
 - Allow idle stdio shutdown on interrupt and handle redirected pipes/files with cancellable reads, including split UTF-8 input and EOF.
 
-Full Changelog: [v0.1.0…v0.1.1](https://github.com/orchex006/axiom-mcp/compare/v0.1.0...v0.1.1)
+Full Changelog: [v0.1.0…v0.1.1](https://github.com/cognivex006/axiom-mcp/compare/v0.1.0...v0.1.1)
 
 ## 0.1.0
 

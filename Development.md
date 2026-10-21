@@ -1,15 +1,25 @@
 # Development — axiom-mcp
 
+## Current machine delivery policy (2026-10-21)
+
+The explicit owner request and current ecosystem policy supersede hosted-Actions
+requirements and older release-tag retention instructions for this migration.
+Use [local build and deployment](docs/LOCAL-BUILD-DEPLOY.md). Preserve required
+checks, native evidence, independent review, integrity and rollback gates.
+Do not publish cached legacy-owner binaries. New source is feature-only; main
+integration and rebuilt multi-platform release publication remain separate.
+
+
 ## Portable MCP delivery
 
-Ship one `py3-none-any` wheel and the same commands across native OS targets. CLI owns platform installation/service supervision; MCP uses internal native guard adapters. Stdio is a host-owned child; HTTP runs in foreground. Current READY requires installed-wheel Windows/Linux/Mac Intel GitHub Actions checks and immutable wheel/source hashes. Mac ARM, certification, signing and attestation are not gates. Earlier local candidate/certification statements below are historical scope records. Publication remains separately authorized.
+Ship one `py3-none-any` wheel and the same commands across native OS targets. CLI owns platform installation/service supervision; MCP uses internal native guard adapters. Stdio is a host-owned child; HTTP runs in foreground. Current READY requires installed-wheel Windows/Linux/Mac Intel operator-managed build machines checks and immutable wheel/source hashes. Mac ARM, certification, signing and attestation are not gates. Earlier local candidate/certification statements below are historical scope records. Publication remains separately authorized.
 
 ## Repository identity
 
 | Field | Value |
 | --- | --- |
 | Component | `axiom-mcp` |
-| Canonical remote | `https://github.com/orchex006/axiom-mcp` |
+| Canonical remote | `https://github.com/cognivex006/axiom-mcp` |
 | Owns | MCP server surface ที่ expose Axiom graph operations ให้ host/agent |
 | Does not own | graph runtime (`axiom-graphd`), ecosystem contracts (`axiom-specs`), skills (`axiom-skills`) |
 
@@ -157,7 +167,7 @@ The user explicitly requested all reported fixes and merge/release as 0.1.11 on 
 
 ## Terminal UX development
 
-For CLI, installer, bootstrap, interactive setup and long-running terminal changes, consult the canonical [cli-terminal-ux skill](https://github.com/orchex006/axiom-cli/blob/main/.agents/skills/cli-terminal-ux/SKILL.md) by default. Resolve its normative contract through the verified spec pin; retain native visual evidence and existing ownership/approval/release rules. Other repositories link that source rather than maintaining edited copies.
+For CLI, installer, bootstrap, interactive setup and long-running terminal changes, consult the canonical [cli-terminal-ux skill](https://github.com/cognivex006/axiom-cli/blob/main/.agents/skills/cli-terminal-ux/SKILL.md) by default. Resolve its normative contract through the verified spec pin; retain native visual evidence and existing ownership/approval/release rules. Other repositories link that source rather than maintaining edited copies.
 
 The current 2026-10-18 owner request explicitly authorizes the scoped 0.1.13 implementation, integration and new immutable publication after mandatory native/visual, independent review and previous-release rollback/source-hash gates. Preserve real user state and historical tags/assets.
 

@@ -33,4 +33,4 @@ These pages explain the implementation for integrators and contributors:
 - [Portable paths](portable-paths.md)
 - [MCP SDK and FastAPI lifecycle](sdk-mount-lifecycle.md)
 
-For the complete workflow, see [Build → watch → query](https://github.com/orchex006/axiom-skills/blob/main/docs/guides/graph-lifecycle.md). Versioned changes are in [Changelog](../Changelog.md); contribution procedures are in [Development](../Development.md).
+For the complete workflow, see [Build → watch → query](https://github.com/cognivex006/axiom-skills/blob/main/docs/guides/graph-lifecycle.md). Versioned changes are in [Changelog](../Changelog.md); contribution procedures are in [Development](../Development.md).

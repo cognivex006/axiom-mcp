@@ -1,0 +1,47 @@
+{
+  "task_id": "W-075",
+  "source_repo": "axiom-mcp",
+  "platform": "windows-x64",
+  "execution": "native",
+  "verification": "source checks; not release acceptance",
+  "commands": [
+    {
+      "command": "python -m pytest tests -q",
+      "exit_code": 0,
+      "raw_log_sha256": "9165cd76ca68a77f06e2ba5450483eeb4a5bd781588d4aa30aca807b2eb30b73",
+      "observed_summary": [
+        "876 passed, 5 skipped, 274 subtests passed in 336.66s (0:05:36)"
+      ]
+    },
+    {
+      "command": "python -m ruff check .",
+      "exit_code": 0,
+      "raw_log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "observed_summary": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "command": "python -m ruff format --check .",
+      "exit_code": 0,
+      "raw_log_sha256": "3e363a951eafb2bc4d7b7edadd4f34b1fb2c5ca55e2ed514e89e27827e64b786",
+      "observed_summary": []
+    },
+    {
+      "command": "python tools/check_public_docs.py",
+      "exit_code": 0,
+      "raw_log_sha256": "c39c1836441b577fdfc76825dfa9554cf43df45c70130d96430f4dee66d32dc5",
+      "observed_summary": [
+        "Public MCP documents, tool help and selected wheel/release text: no private IDs."
+      ]
+    }
+  ],
+  "spec_revision": "4ef9d1d5be0588e85df3a437efa2ae6df2f81245",
+  "verified_contract_digests": 40,
+  "limitations": [
+    "Rebuilt multi-platform binary acceptance and publication are pending.",
+    "Linux, macOS, WSL, current manual terminal screenshots and release upgrade/rollback were not executed for this namespace migration.",
+    "Original legacy-owner cached release bytes remain unpublished."
+  ],
+  "preserved_history": "Original source commits, archived task receipts and frozen contract/skill fixtures retain original identities."
+}

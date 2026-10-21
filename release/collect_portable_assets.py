@@ -32,8 +32,8 @@ def render_release_notes(version: str, repository: Path | None = None) -> str:
         f"```sh\npython -m pip install axiom_mcp-{version}-py3-none-any.whl\n```\n\n"
         "Configure stdio or Streamable HTTP with registered credential references. "
         "Tool discovery alone does not establish authenticated graph access.\n\n"
-        "See the [installation guide](https://github.com/orchex006/axiom-mcp/blob/main/docs/"
-        "install-and-upgrade.md) and [tool reference](https://github.com/orchex006/axiom-mcp/"
+        "See the [installation guide](https://github.com/cognivex006/axiom-mcp/blob/main/docs/"
+        "install-and-upgrade.md) and [tool reference](https://github.com/cognivex006/axiom-mcp/"
         "blob/main/docs/reference/mcp.md).\n"
     )
 
