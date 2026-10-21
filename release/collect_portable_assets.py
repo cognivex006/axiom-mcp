@@ -38,7 +38,10 @@ def render_release_notes(version: str, repository: Path | None = None) -> str:
     )
 
 
-def collect(root: Path, source: str, output: Path):
+def collect(root: Path, source: str, output: Path, platforms=None):
+    lanes = LANES if platforms is None else set(platforms)
+    if not lanes or not lanes <= LANES:
+        raise ValueError("invalid declared native platform scope")
     if not re.fullmatch(r"[0-9a-f]{40}", source) or output.exists():
         raise ValueError("immutable source and new output required")
     proofs = list(root.rglob("wheel-provenance.json"))
@@ -55,7 +58,7 @@ def collect(root: Path, source: str, output: Path):
     for path in root.rglob("native-report.json"):
         report = json.loads(path.read_bytes())
         lane = report.get("platform")
-        if lane in reports or lane not in LANES:
+        if lane in reports or lane not in lanes:
             raise ValueError("duplicate/unsupported native lane")
         if (
             report.get("execution") != "native"
@@ -69,13 +72,13 @@ def collect(root: Path, source: str, output: Path):
         if not cases or any(c.get("exit_code") != c.get("expected_exit_code") for c in cases):
             raise ValueError("failed/missing native cases")
         reports[lane] = path
-    if set(reports) != LANES:
-        raise ValueError("three native lanes required")
+    if set(reports) != lanes:
+        raise ValueError("all declared native lanes required")
     inputs = {}
     for path in root.rglob("*-runtime-inputs.json"):
         item = json.loads(path.read_bytes())
         lane = item.get("platform")
-        if lane not in LANES or lane in inputs or item.get("source_revision") != source:
+        if lane not in lanes or lane in inputs or item.get("source_revision") != source:
             raise ValueError("runtime input source/lane mismatch")
         if item.get("owner_wheel_sha256") != proof["sha256"]:
             raise ValueError("runtime inputs use another owner wheel")
@@ -89,7 +92,7 @@ def collect(root: Path, source: str, output: Path):
                 raise ValueError("runtime asset hash mismatch")
             files.append(file)
         inputs[lane] = files
-    if proof.get("runtime_inputs_required") and set(inputs) != LANES:
+    if proof.get("runtime_inputs_required") and set(inputs) != lanes:
         raise ValueError("native dependency inputs required for distribution")
     repository = Path(__file__).resolve().parents[1]
     version = tomllib.loads((repository / "pyproject.toml").read_text(encoding="utf-8"))["project"][
@@ -124,5 +127,11 @@ if __name__ == "__main__":
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--source-revision", required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--platforms", help="explicit owner-approved native scope, comma separated")
     args = parser.parse_args()
-    collect(args.input, args.source_revision, args.out)
+    collect(
+        args.input,
+        args.source_revision,
+        args.out,
+        args.platforms.split(",") if args.platforms else None,
+    )

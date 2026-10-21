@@ -1,0 +1,10 @@
+{
+  "task_id": "W-080",
+  "owner_repository": "axiom-mcp",
+  "branch": "feature/w-080-windows-014",
+  "status": "published",
+  "version": "0.1.14",
+  "published_source_revision": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5",
+  "publication_receipt": "evidence/W-080/publication.json",
+  "main_integration": "Pending human review; protected main unchanged."
+}
