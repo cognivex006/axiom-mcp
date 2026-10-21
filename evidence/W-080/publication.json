@@ -1,0 +1,112 @@
+{
+  "task_id": "W-080",
+  "version": "0.1.14",
+  "published_source_revision": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5",
+  "tag": "v0.1.14",
+  "publication": {
+    "published": true,
+    "repository": "cognivex006/axiom-mcp",
+    "version": "0.1.14",
+    "url": "https://github.com/cognivex006/axiom-mcp/releases/tag/v0.1.14",
+    "source_revision": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5",
+    "release_branch": "release/v0.1.14",
+    "asset_count": 11,
+    "downloaded_sha256": {
+      "axiom-mcp-0.1.14-windows-x64-wheelhouse.tar.gz": "3bdd97f2ee1d6d0906d059a1fb6e0f46855189cb4eb880ddccf92b3abefd187d",
+      "axiom_mcp-0.1.14-py3-none-any.whl": "9615556f5593719b493929ab2d0fbaa83c688bd45acce4837f6c2c94eb5450c1",
+      "RELEASE-NOTES.md": "92c67008c40cde3ebffca0c9eb026b9aefef39af2178cbbb105b1378ef6cbb30",
+      "RELEASE-SCOPE.json": "147623b4b0706895172ba3b37b8e7aa0c5968166aa5ba5c4f8779bba5645fdc5",
+      "SHA256SUMS": "0492a9be0be4a3756d9744d78aa49fa72f1e9625a34252f4c974f1785f38886f",
+      "SOURCE-REVISION.txt": "4c88ac03a3bbf60b3c48289fe5fd97b35fec36758430a8c0cb74b113a27488d5",
+      "wheel-provenance.json": "357f454bd673f74e56979ffea23b1fcf84c537967ef3ec5402144cad553a23eb",
+      "windows-x64-native-report.json": "c6d0a37ee1c531cb7d0ceea775c3a295f6bd7c226c368a8f867672cd9d7c476c",
+      "windows-x64-py313-inputs.tar": "6139f755579e9ee6b82ca41843952db97e1c87c635081a5b1bfb2e83261b221b",
+      "windows-x64-py313-requirements.txt": "a24ce21137e780baca68a3a0e1695efe11959634a6a5cdc61a3792c48afa61a6",
+      "windows-x64-runtime-inputs.json": "90c7c30b885e91d052227da74772bdc377affc48bf06dfe8ffd7ecc1871d354e"
+    },
+    "github_workflows_used": false,
+    "protected_main_unchanged": true
+  },
+  "public_install": {
+    "passed": true,
+    "version": "0.1.14",
+    "execution": "native",
+    "platform": "windows-x64",
+    "sources": {
+      "axiom-cli": "b9a836bcc9d0dfde9df10d104dd60662ef7df73c",
+      "axiom-graphd": "b054ea90af103117020878c1c1a3cf97925eb9e5",
+      "axiom-skills": "dd19829e850b9700821ccd2938383df0126b0d76",
+      "axiom-mcp": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5"
+    },
+    "downloaded_scripts_sha256": {
+      "install.ps1": "b9b82dc983d6ee5cb4eec3d900fb7bd77870aa6e5a92d9449d0a15d2be1f1317",
+      "update.ps1": "e2a1c565e707e4454a0d401daf92f649f67af930ce6e57f244649daa73f2ac82",
+      "channel.json": "20256bc0248963e1cdbd9b9464e293900ee3f37d27c0a0ffbd85510babdc387f"
+    },
+    "cases": [
+      {
+        "case": "canonical public Windows install",
+        "exit_code": 0,
+        "raw_log_sha256": "c80c957be19733cf389d1716a886e3f3a8f3b6f3716e8ed966952dbe8028749a"
+      },
+      {
+        "case": "installed version",
+        "exit_code": 0,
+        "raw_log_sha256": "8b9b549075dca0f691926a8bacd4cb93cafed3e93ba9db5bbb5e7adb143b6eb1"
+      },
+      {
+        "case": "installed doctor",
+        "exit_code": 0,
+        "raw_log_sha256": "05eac3aa121e8be60d8613802d60ee4de7ac8193b8076c40d91fbf32bb1b212f"
+      },
+      {
+        "case": "installed MCP source",
+        "exit_code": 0,
+        "raw_log_sha256": "437f66a06b92333196f814aebf1b5908c5dace98a3de859911beedf4b209b1a2"
+      },
+      {
+        "case": "canonical public same-release channel/update smoke",
+        "exit_code": 0,
+        "raw_log_sha256": "a8ca3b31478f1eea403d63556adb9b114ecdb3ea4b4c1b3690da0de241867cfe"
+      },
+      {
+        "case": "doctor after public update",
+        "exit_code": 0,
+        "raw_log_sha256": "05eac3aa121e8be60d8613802d60ee4de7ac8193b8076c40d91fbf32bb1b212f"
+      },
+      {
+        "case": "private-profile uninstall",
+        "exit_code": 0,
+        "raw_log_sha256": "b89b82829b890b26a80a23a939d6994ea8dab49a5df7c5f51b6c5dd92f9ddb83"
+      }
+    ],
+    "profile_isolation": true,
+    "user_data_preserved": true,
+    "scope": "Actual GitHub canonical downloads and installed channel; existing elevation fixture seam, no GUI-host certification."
+  },
+  "local_build_sha256": "3081318c37119895c6c2c9696ae417b5ef4a7bc62a2856e3443a9e78eaf6d4f2",
+  "source_checks_sha256": "64d3a982e0d3d0887399bc01bbece9af465d0054567c2d969a232aa5461bd141",
+  "independent_review": "Reviewed source and final local-machine publication plan; all native gates passed before publication.",
+  "limitations": "Windows x64 only; portable MCP/skills tested on Windows, unsigned binaries; no licensed GUI-host certification. Protected component main remains unchanged; source integration awaits human PR review. Historical evidence and original artifacts remain unchanged.",
+  "github_workflows_used": false,
+  "native_acceptance": {
+    "passed": true,
+    "source_bound_build": true
+  },
+  "native_readiness": {
+    "state": "READY",
+    "ready": true,
+    "certification_required": false,
+    "wheel_sha256": "9615556f5593719b493929ab2d0fbaa83c688bd45acce4837f6c2c94eb5450c1",
+    "source_revision": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5",
+    "verification": "local_machine",
+    "native_lanes": [
+      {
+        "platform": "windows-x64",
+        "report_sha256": "c6d0a37ee1c531cb7d0ceea775c3a295f6bd7c226c368a8f867672cd9d7c476c"
+      }
+    ],
+    "macos_arm64": "deferred",
+    "published": false
+  }
+}

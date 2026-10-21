@@ -2,9 +2,9 @@
   "task_id": "W-080",
   "owner_repository": "axiom-mcp",
   "branch": "feature/w-080-windows-014",
-  "status": "source_verified",
+  "status": "published",
   "version": "0.1.14",
-  "verification_artifact": "evidence/W-080/source-checks.json",
-  "git_delivery": "Exact committed and remote source SHA is recorded in the current release coordination source vector.",
-  "release_acceptance": "Native Windows package/runtime/distribution proof and authorized publication remain pending."
+  "published_source_revision": "0b702e8b68ef48cb628104c1fa5c8124937ccdf5",
+  "publication_receipt": "evidence/W-080/publication.json",
+  "main_integration": "Pending human review; protected main unchanged."
 }
