@@ -17,6 +17,12 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## 0.1.14
 
+### Current Windows distribution
+
+- Rebuild Windows delivery under cognivex006 with source-bound local-machine verification and no GitHub Actions.
+- Retain immutable source/checksum inventories and the current complete-inventory graph fixes.
+
+
 ### Bug Fixes
 
 - Keep gateway startup and restart reliable when Windows readers briefly hold its status file open. Persistent permission failures still stop the operation without overwriting existing state.

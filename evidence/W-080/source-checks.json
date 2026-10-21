@@ -1,0 +1,51 @@
+{
+  "task_id": "W-080",
+  "repository": "axiom-mcp",
+  "status": "source_verified",
+  "version": "0.1.14",
+  "platform": "windows-x64",
+  "spec_revision": "c8bd7f33d562b31a585478d377f866ce0da4fb0c",
+  "source_unchanged_during_checks": true,
+  "checks": [
+    {
+      "command": "python.exe -m pytest tests -q",
+      "exit_code": 0,
+      "raw_log_sha256": "c1221a5a2491b4893b898095d55976f74d3af754b3b72b2952ae48bb16cb3188",
+      "observed_summary": [
+        "876 passed, 5 skipped, 274 subtests passed in 230.80s (0:03:50)"
+      ]
+    },
+    {
+      "command": "python.exe -m ruff check .",
+      "exit_code": 0,
+      "raw_log_sha256": "98733c3446b52dc3e6b6943142b19a142025d9727521f6abc3783a20e4b6d3c6",
+      "observed_summary": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "command": "python.exe -m ruff format --check .",
+      "exit_code": 0,
+      "raw_log_sha256": "12c44a07a61516f03dae74e23de137c20c46510f33c6aa19fdc634ed45518fad",
+      "observed_summary": []
+    },
+    {
+      "command": "python.exe tools/check_public_docs.py",
+      "exit_code": 0,
+      "raw_log_sha256": "4ff42ac6acb67498ab2f97853906c70d1820f7fdd6131462743e997cc2750d52",
+      "observed_summary": []
+    }
+  ],
+  "independent_review": "No blocking source finding; actual native owner/distribution, refusal and rollback acceptance remains mandatory before publication.",
+  "publication": "not_published",
+  "tested_input_hashes": {
+    "Changelog.md": "3ea03a89d71244e89eae955c78121e684fe3e6c36298c124695ac5d1f9294bda",
+    "Development.md": "1df87eb9bb8c658b82eff0b7e811ace5719ab2a21013a0aa3b51ce24b2192f32",
+    "docs/LOCAL-BUILD-DEPLOY.md": "5d8972f128d8d1f96c41c94364dbc347c80e2b5cddb14f3398f07fef4b16d95a",
+    "pyproject.toml": "8493857cfbc26627d37c8b6951a9cbf7b16df4f9912ec09e6ded1e5778b2658d",
+    "release/collect_portable_assets.py": "ffaf1f7cba33d28256859b2b7d50a532384f644849ee2999ebbc4fa1a8dffe74",
+    "release/readiness.json": "2a200bac06858cd1303798769b009832a5af6f3b8a502376071cb04639eaa0d9",
+    "spec.lock.json": "4b52aa62f5cc77d1a47c6785707f4b1ca052c275d86fcdc99624640fabdbd8fc",
+    "src/axiom_mcp/version.py": "a3eda81b4bca3c3f48910d4bd8a980c805fa9eedcda0c94a5527699950f88aec"
+  }
+}
