@@ -110,4 +110,4 @@ See [Development](https://github.com/cognivex006/axiom-mcp/blob/main/Development
 
 ## Build and deployment
 
-Build, verify and deploy on operator-managed machines; see [local build and deployment](docs/LOCAL-BUILD-DEPLOY.md). GitHub Actions workflows are removed.
+Build, verify and deploy on operator-managed machines; see [local build and deployment](https://github.com/cognivex006/axiom-mcp/blob/main/docs/LOCAL-BUILD-DEPLOY.md). GitHub Actions workflows are removed.
