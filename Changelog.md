@@ -6,6 +6,7 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ### Added
 
+- When `config/registry.json` still holds graphd daemon settings instead of the solution registry, MCP and `axmp setup` say so and tell you how to fix it (`axge solution register` again, or move the file to `config/daemon.json`). Before, it was reported as a malformed registry.
 - `axmp setup` (also `axm mcp setup`) creates a local read-only credential for your registered solutions in one step. It shows the plan first and changes nothing until you add `--apply`. The secret goes in a private file under your Axiom folder and is never printed. The gateway, the stdio server and `doctor` find it automatically, so no environment variables are needed; any you set still take priority. Setup doesn't change your AI assistant's settings: it prints the command to connect Claude Code.
 
 ### Chores

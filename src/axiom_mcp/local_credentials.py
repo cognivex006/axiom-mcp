@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from axiom_mcp import security
-from axiom_mcp.registry import axiom_home, load_registry
+from axiom_mcp.registry import RegistryError, axiom_home, load_registry
 
 REGISTRY_ENV = "AXIOM_MCP_TOKEN_REGISTRY"
 REFERENCE_ENV = "AXIOM_MCP_TOKEN_REFERENCE"
@@ -188,7 +188,11 @@ def main(argv: list[str]) -> int:
     if unknown:
         print(f"axmp setup: unknown option {unknown[0]}", file=sys.stderr)
         return 2
-    before = plan()
+    try:
+        before = plan()
+    except RegistryError as exc:
+        print(f"axmp setup: {exc}", file=sys.stderr)
+        return 6
     setup = apply(before) if apply_flag else before
     # Report what this run found and did: "created"/"written" only for real changes.
     lines = render(before, applied=apply_flag)

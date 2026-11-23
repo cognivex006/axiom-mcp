@@ -90,6 +90,18 @@ class RegistryUnreadable(RegistryError):
     """A registry document that is missing a required member or malformed."""
 
 
+class RegistryIsDaemonConfig(RegistryUnreadable):
+    """``config/registry.json`` still holds graphd daemon settings (ADR-0047)."""
+
+    reason = "registry_is_daemon_config"
+
+
+DAEMON_CONFIG_HINT = (
+    "config/registry.json holds graphd daemon settings, not the solution registry: "
+    "run `axge solution register` again, or move this file to config/daemon.json"
+)
+
+
 class UnsupportedRegistryMajor(RegistryError):
     """A registry document whose ``schema_version`` major is not supported."""
 
@@ -427,6 +439,8 @@ def parse_registry(
         if Path(declared_home) != base:
             raise RegistryUnreadable("registry axiom_home does not match the resolved AXIOM_HOME")
 
+    if "schema_version" not in body:
+        raise RegistryIsDaemonConfig(DAEMON_CONFIG_HINT)
     version = body.get("schema_version")
     if not isinstance(version, int) or isinstance(version, bool):
         raise RegistryUnreadable("registry schema_version must be an integer")
@@ -565,6 +579,7 @@ __all__ = [
     "CatalogLocation",
     "ProjectBinding",
     "RegistryError",
+    "RegistryIsDaemonConfig",
     "RegistryUnreadable",
     "RelativeAxiomHome",
     "RepositoryBinding",

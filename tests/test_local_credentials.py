@@ -70,3 +70,17 @@ def test_doctor_sees_the_setup_credential_without_env(tmp_path: Path) -> None:
 def test_unknown_option_is_validation(capsys: pytest.CaptureFixture[str]) -> None:
     assert lc.main(["--bogus"]) == 2
     assert "unknown option" in capsys.readouterr().err
+
+
+def test_daemon_shaped_registry_names_the_repair(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "registry.json").write_text(
+        '{"storage": {"journalMode": "DELETE"}}', encoding="utf-8"
+    )
+    for key, value in _env(tmp_path).items():
+        monkeypatch.setenv(key, value)
+    assert lc.main([]) == 6
+    err = capsys.readouterr().err
+    assert "daemon settings" in err and "axge solution register" in err
