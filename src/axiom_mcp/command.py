@@ -7,7 +7,8 @@ from collections.abc import Sequence
 
 USAGE = """axmp - Axiom MCP Server / Gateway
 
-USAGE: axmp [serve|start|list|status|stop|stdio|http|version|doctor|update|entrypoints] [options]
+USAGE: axmp [serve|start|list|status|stop|stdio|http|setup|version|doctor|update|entrypoints]
+            [options]
 
 COMMANDS:
   serve    local HTTP gateway; named instance, owner and three-hour idle lifecycle
@@ -17,6 +18,7 @@ COMMANDS:
   stop     stop the only running instance, or an explicit --instance
   stdio    host-owned MCP child process (default)
   http     local Streamable HTTP gateway; explicit Host/Origin allowlists required
+  setup    create the local read credential and registry (plan; --apply to write)
   version  component/runtime versions
   doctor   credential and graph-readiness diagnostics
   update   check availability or delegate an approved update plan
@@ -47,12 +49,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         from axiom_mcp.cli import main as run
 
         return run(arguments)
+    if arguments[0] == "setup":
+        from axiom_mcp.local_credentials import main as run
+
+        return run(arguments[1:])
     if arguments[0] == "entrypoints":
         from axiom_mcp.entrypoints import main as run
 
         return run(arguments[1:])
     print(
-        "axmp: expected serve, start, list, status, stop, stdio, http, version, doctor, "
+        "axmp: expected serve, start, list, status, stop, stdio, http, setup, version, doctor, "
         "update or entrypoints; "
         "use axmp --help",
         file=sys.stderr,

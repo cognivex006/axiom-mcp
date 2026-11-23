@@ -26,6 +26,7 @@ import uvicorn
 from axiom_mcp import http, sdk_compat, security, version
 from axiom_mcp.guard.engine import LockMode, load_backend
 from axiom_mcp.guard.errors import GuardBusy, GuardError
+from axiom_mcp.local_credentials import effective_registry_path
 from axiom_mcp.registry import axiom_home
 from axiom_mcp.retention import GenerationRetention
 from axiom_mcp.runtime import Runtime
@@ -269,14 +270,14 @@ def signature(args: argparse.Namespace) -> str:
     value.update(
         runtime=str(Path(sys.executable).resolve()),
         version=version.VERSION,
-        credentials=os.environ.get("AXIOM_MCP_TOKEN_REGISTRY", ""),
+        credentials=effective_registry_path() or "",
         control=os.environ.get("AXIOM_CONTROL_URL", ""),
         control_reference=os.environ.get("AXIOM_CONTROL_TOKEN_REFERENCE", ""),
     )
     # Only the final private configuration digest is retained. Never log secrets
     # or per-secret hashes; changing a reference's contents must require restart.
     credentials = []
-    registry = os.environ.get("AXIOM_MCP_TOKEN_REGISTRY")
+    registry = effective_registry_path()
     if registry:
         try:
             with Path(registry).open("rb") as stream:

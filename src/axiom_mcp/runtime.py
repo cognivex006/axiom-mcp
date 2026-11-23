@@ -16,8 +16,8 @@ import httpx
 from mcp import types
 from mcp.server.fastmcp import FastMCP
 
+from axiom_mcp import local_credentials, security
 from axiom_mcp import manifest as manifests
-from axiom_mcp import security
 from axiom_mcp.catalog import load_solution_catalog
 from axiom_mcp.control_client import ControlClientSettings, HttpControlClient
 from axiom_mcp.errors import AxiomError, redact_details
@@ -120,7 +120,9 @@ class Runtime:
         from axiom_mcp.cli import load_registry as load_tokens
 
         tokens = security.TokenRegistry()
-        path = os.environ.get("AXIOM_MCP_TOKEN_REGISTRY")
+        from axiom_mcp.local_credentials import effective_registry_path
+
+        path = effective_registry_path()
         if path:
             tokens, errors = load_tokens(path)
             if errors:
@@ -280,7 +282,7 @@ def compose(server: FastMCP, runtime: Runtime, *, transport: str) -> FastMCP:
                 request = server._mcp_server.request_context.request
                 presented = security.parse_authorization(request.headers) if request else None
             else:
-                presented = reference_value(os.environ.get("AXIOM_MCP_TOKEN_REFERENCE"))
+                presented = reference_value(local_credentials.effective_reference())
             context = runtime.context(presented)
             handler = handlers.get(name)
             if handler is None:

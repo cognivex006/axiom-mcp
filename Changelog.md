@@ -4,6 +4,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+### Added
+
+- `axmp setup` (also `axm mcp setup`) creates a local read-only credential for your registered solutions in one step. It shows the plan first and changes nothing until you add `--apply`. The secret goes in a private file under your Axiom folder and is never printed. The gateway, the stdio server and `doctor` find it automatically, so no environment variables are needed; any you set still take priority. Setup doesn't change your AI assistant's settings: it prints the command to connect Claude Code.
+
 ### Chores
 
 - Move repository and download references to cognivex006 and run verification/builds on operator-managed machines instead of GitHub Actions.

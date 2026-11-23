@@ -37,7 +37,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from axiom_mcp import errors, http, security, update, version
+from axiom_mcp import errors, http, local_credentials, security, update, version
 
 
 def managed_readiness() -> http.ReadinessReport:
@@ -321,7 +321,7 @@ def credential_scope(
 ) -> CredentialScope:
     """Report the configured credential reference and, if registered, its scope."""
     source = os.environ if environ is None else environ
-    raw = (source.get(CREDENTIAL_REFERENCE_ENV) or "").strip()
+    raw = (local_credentials.effective_reference(source) or "").strip()
     if not raw:
         return CredentialScope(configured=False, reason="credential_reference_not_configured")
     try:
@@ -345,9 +345,7 @@ def credential_scope(
             reason="credential_reference_unresolved",
         )
 
-    configured_registry = (
-        registry_path or (source.get(CREDENTIAL_REGISTRY_ENV) or "").strip() or None
-    )
+    configured_registry = registry_path or local_credentials.effective_registry_path(source) or None
     if configured_registry is None:
         return CredentialScope(
             configured=True,
