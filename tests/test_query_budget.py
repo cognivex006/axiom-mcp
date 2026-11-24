@@ -135,3 +135,22 @@ def test_trimmable_collections_are_trimmed_in_order() -> None:
     assert result.dropped.get("nodes", 0) > 0
     if result.document["nodes"]:
         assert not result.document["edges"], "edges are only kept once nodes are trimmed empty"
+
+
+def edge(index: int) -> dict:
+    return {"id": f"{index:064d}", "source_id": "0" * 64, "kind": "REFERENCES", "x": "e" * 40}
+
+
+def test_edges_are_trimmed_before_nodes() -> None:
+    """Field report 2026-11-24: a widely used type returned 13 edges and no nodes at 8 KiB."""
+    document = {
+        **METADATA,
+        "nodes": [node(i) for i in range(20)],
+        "edges": [edge(i) for i in range(200)],
+    }
+    result = pack_response(document, max_bytes=4096)
+
+    assert result.document["nodes"] == document["nodes"], "every node is kept"
+    assert 0 < result.dropped["edges"] <= 200
+    assert "nodes" not in result.dropped
+    assert result.byte_size <= 4096

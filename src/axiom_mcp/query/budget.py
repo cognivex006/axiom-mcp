@@ -7,8 +7,10 @@ including every metadata key. There is no separate "payload" budget that metadat
 from.
 
 When the document does not fit, this packer trims whole items from the end of the trimmable
-collections - ``nodes``, ``edges``, ``unresolved``, ``candidates``, then ``warnings`` - from least
-to most important, and reports exactly what it dropped. Two cases are explicit rather than silent:
+collections - ``unresolved``, ``candidates``, ``edges``, ``nodes``, then ``warnings`` - from least
+to most important, and reports exactly what it dropped. Edges go before nodes (field report
+2026-11-24): an edge names nodes by id, so a response of edges without their nodes tells a caller
+nothing it can act on, while nodes without some edges are still the answer, marked truncated. Two cases are explicit rather than silent:
 
 * if a collection held a single item that did not fit, that is recorded as ``oversized_item`` with
   the collection's name, because a caller must be able to tell a trimmed list from one that could
@@ -34,7 +36,7 @@ from axiom_mcp.query.model import (
 )
 
 #: Collections trimmed, in order, when the document exceeds the cap.
-TRIMMABLE = ("nodes", "edges", "unresolved", "candidates", "warnings")
+TRIMMABLE = ("unresolved", "candidates", "edges", "nodes", "warnings")
 
 STATUS_OK = "ok"
 

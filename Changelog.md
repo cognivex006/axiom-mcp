@@ -4,6 +4,10 @@ User-visible changes, newest first. Download wheels and checksum records from [G
 
 ## Unreleased
 
+### Bug Fixes
+
+- When a query result is larger than `max_bytes`, edges are now dropped before nodes. Before, a widely used type could come back as edges that name nodes the response no longer contained. The result is still marked truncated and says what was dropped.
+
 ### Chores
 
 - Move repository and download references to cognivex006 and run verification/builds on operator-managed machines instead of GitHub Actions.
