@@ -10,7 +10,8 @@ When the document does not fit, this packer trims whole items from the end of th
 collections - ``unresolved``, ``candidates``, ``edges``, ``nodes``, then ``warnings`` - from least
 to most important, and reports exactly what it dropped. Edges go before nodes (field report
 2026-11-24): an edge names nodes by id, so a response of edges without their nodes tells a caller
-nothing it can act on, while nodes without some edges are still the answer, marked truncated. Two cases are explicit rather than silent:
+nothing it can act on, while nodes without some edges are still the answer, marked truncated.
+Two cases are explicit rather than silent:
 
 * if a collection held a single item that did not fit, that is recorded as ``oversized_item`` with
   the collection's name, because a caller must be able to tell a trimmed list from one that could
